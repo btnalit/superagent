@@ -17,7 +17,7 @@
 
 - [x] Copy source design documents into `docs/reference/`.
 - [x] Run fresh verification gates.
-- [ ] Initialize git and push `main` to GitHub.
+- [x] Initialize git and push `main` to GitHub.
 
 ## Next
 
