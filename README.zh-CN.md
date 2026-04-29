@@ -18,6 +18,22 @@ npm run build
 npm start
 ```
 
+公网 npm 包部署：
+
+```bash
+npm install -g @btnalit/ycsuperagent
+ycsuperagent setup
+ycsuperagent up
+ycsuperagent status
+```
+
+维护者发布到 npm：
+
+```bash
+npm login
+npm publish --access public
+```
+
 或链接本地 CLI：
 
 ```bash
@@ -73,6 +89,7 @@ mercury status       # 查看运行状态
 
 | 命令 | 说明 |
 |------|------|
+| `ycsuperagent up` | 通过 npm 全局安装后的推荐命令：安装服务、启动守护进程并确保运行 |
 | `mercury up` | 推荐命令：安装服务、启动守护进程并确保运行 |
 | `mercury` | 启动 Agent，等同于 `mercury start` |
 | `mercury start` | 前台启动 |

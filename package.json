@@ -1,13 +1,17 @@
 {
-  "name": "superagent",
+  "name": "@btnalit/ycsuperagent",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "description": "Goal-contract AI agent runtime built on Mercury with traceable execution, tool authority, skills, evaluation, and evolution proposals.",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
+    "ycsuperagent": "./dist/index.js",
     "superagent": "./dist/index.js",
     "mercury": "./dist/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "tsup",

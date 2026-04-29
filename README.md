@@ -36,6 +36,22 @@ npm run build
 npm start
 ```
 
+Public npm package deployment:
+
+```bash
+npm install -g @btnalit/ycsuperagent
+ycsuperagent setup
+ycsuperagent up
+ycsuperagent status
+```
+
+Maintainer npm publish:
+
+```bash
+npm login
+npm publish --access public
+```
+
 Or link the local CLI:
 
 ```bash
