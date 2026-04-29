@@ -13,6 +13,8 @@ The remote typecheck annotations showed missing modules such as `../memory/store
 
 - Scope runtime data ignores to repository-root directories only: `/memory/`, `/soul/`, `/config/`.
 - Commit the previously ignored source files under `src/memory/` and `src/soul/`.
+- Upgrade official GitHub Actions from v4 to v6 so they run on the Node 24 action runtime.
+- Change the Termux job to copy the checkout into the container instead of changing ownership of the mounted GitHub workspace.
 
 ## Verification Evidence
 
@@ -23,4 +25,5 @@ The remote typecheck annotations showed missing modules such as `../memory/store
 - `npm run typecheck` -> PASS.
 - `npm run build` -> PASS.
 - `node scripts\verify-package.cjs` -> PASS.
-- Confirm the pushed GitHub Actions run completes successfully.
+- GitHub Actions run `#3` -> PASS after committing the missing sources.
+- GitHub Actions run after warning cleanup -> pending.

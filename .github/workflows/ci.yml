@@ -24,8 +24,8 @@ jobs:
           - os: macos-latest
             node: 22
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -48,8 +48,8 @@ jobs:
           - os: macos-latest
             node: 22
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -71,8 +71,8 @@ jobs:
           - os: macos-latest
             node: 22
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -86,7 +86,7 @@ jobs:
     name: Termux (Android, x86_64)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Run CI in Termux container
         shell: bash
@@ -94,11 +94,13 @@ jobs:
           docker run --rm \
             --privileged \
             --entrypoint /entrypoint_root.sh \
-            -v "${{ github.workspace }}:/home/builder/project" \
+            -v "${{ github.workspace }}:/host/project:ro" \
             -e "HOME=/home/builder" \
             termux/termux-docker:x86_64 \
             bash -c "
               set -e
+              mkdir -p /home/builder/project
+              cp -a /host/project/. /home/builder/project/
               chown -R system:system /home/builder/project
               su - system -c '
                 set -e
