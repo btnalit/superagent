@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>完整 AI Agent 设计方案</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #f5f2ec;
+  --ink: #1a1712;
+  --ink-2: #3d3a33;
+  --ink-3: #8a8478;
+  --ink-4: #c8c3b8;
+  --line: #d8d3c8;
+  --surface: #ffffff;
+  --surface2: #eeebe4;
+  --orange: #d4530a;
+  --orange-light: #f0906a;
+  --orange-bg: rgba(212,83,10,0.06);
+  --blue: #1a4a7a;
+  --blue-light: #4a8abf;
+  --green: #2a6a3a;
+  --red: #8a1a1a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── COVER ── */
+.cover {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.cover-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28px 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.cover-logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.cover-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  letter-spacing: 1px;
+  text-align: right;
+  line-height: 1.6;
+}
+
+.cover-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 48px;
+  position: relative;
+}
+
+/* Blueprint grid in bg */
+.cover-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(212,83,10,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212,83,10,0.04) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+.cover-issue {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 32px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cover-issue::before {
+  content: '';
+  width: 32px;
+  height: 1px;
+  background: var(--orange);
+}
+
+.cover-h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(56px, 9vw, 130px);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -3px;
+  color: #f0ebe3;
+  margin-bottom: 40px;
+  position: relative;
+  max-width: 900px;
+}
+
+.cover-h1 .orange { color: var(--orange); }
+.cover-h1 .italic { font-style: italic; font-weight: 400; }
+
+.cover-desc {
+  font-size: 16px;
+  color: rgba(240,235,227,0.5);
+  max-width: 560px;
+  line-height: 1.75;
+  position: relative;
+  margin-bottom: 48px;
+  font-weight: 300;
+}
+
+.cover-desc strong { color: var(--orange); font-weight: 400; }
+
+.cover-pillars {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.cpillar {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 7px 16px;
+  border: 1px solid rgba(240,235,227,0.15);
+  color: rgba(240,235,227,0.5);
+  transition: all 0.2s;
+}
+.cpillar.active {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(212,83,10,0.08);
+}
+
+.cover-bottom {
+  padding: 24px 48px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cover-principle {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: rgba(240,235,227,0.35);
+  max-width: 500px;
+}
+
+.cover-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 2px;
+}
+
+/* ── NAVIGATION ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ink);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 0 48px;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.nav-item {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  padding: 14px 20px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: block;
+}
+.nav-item:hover { color: rgba(255,255,255,0.7); }
+.nav-item.active { color: var(--orange); border-bottom-color: var(--orange); }
+
+/* ── CHAPTERS ── */
+.chapter {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 80px 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ch-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ch-number::after {
+  content: '';
+  flex: 0 0 40px;
+  height: 1px;
+  background: var(--orange);
+  opacity: 0.4;
+}
+
+.ch-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  color: var(--ink);
+  margin-bottom: 48px;
+}
+.ch-title .italic { font-style: italic; color: var(--orange); }
+
+/* ── PHILOSOPHY BOX ── */
+.philosophy {
+  background: var(--ink);
+  color: #f0ebe3;
+  padding: 48px;
+  margin-bottom: 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.philosophy::before {
+  content: '"';
+  font-family: 'Playfair Display', serif;
+  font-size: 280px;
+  color: rgba(212,83,10,0.08);
+  position: absolute;
+  top: -60px;
+  right: -10px;
+  line-height: 1;
+}
+
+.phil-text {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(18px, 2.5vw, 26px);
+  line-height: 1.55;
+  font-style: italic;
+  position: relative;
+  margin-bottom: 20px;
+}
+.phil-text em { color: var(--orange); font-style: normal; }
+
+.phil-sub {
+  font-size: 13px;
+  color: rgba(240,235,227,0.5);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.5px;
+  line-height: 1.7;
+  position: relative;
+}
+
+/* ── ARCHITECTURE STACK ── */
+.arch-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.arch-layer {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  border-bottom: 1px solid var(--line);
+  min-height: 72px;
+  transition: all 0.25s;
+  cursor: default;
+}
+.arch-layer:last-child { border-bottom: none; }
+.arch-layer:hover { background: var(--surface); }
+.arch-layer:hover .al-label { opacity: 1; }
+
+.al-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px 24px;
+  border-right: 1px solid var(--line);
+  opacity: 0.85;
+  transition: opacity 0.25s;
+}
+
+.al-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+
+.al-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.al-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: 16px 24px;
+}
+
+.chip {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 1px solid;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.chip-o { border-color: rgba(212,83,10,0.3); color: var(--orange); background: var(--orange-bg); }
+.chip-b { border-color: rgba(26,74,122,0.25); color: var(--blue); background: rgba(26,74,122,0.05); }
+.chip-g { border-color: rgba(42,106,58,0.25); color: var(--green); background: rgba(42,106,58,0.05); }
+.chip-k { border-color: var(--line); color: var(--ink-2); background: var(--surface2); }
+.chip-r { border-color: rgba(138,26,26,0.25); color: var(--red); background: rgba(138,26,26,0.05); }
+
+/* ── THE LOOP ── */
+.loop-diagram {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 40px;
+  margin-bottom: 48px;
+}
+
+.loop-header {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.loop-steps {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 800px) {
+  .loop-steps { grid-template-columns: repeat(3, 1fr); }
+  .loop-arrow { display: none; }
+}
+@media (max-width: 500px) {
+  .loop-steps { grid-template-columns: repeat(2, 1fr); }
+}
+
+.ls {
+  border: 1px solid var(--line);
+  margin: -0.5px;
+  padding: 20px 12px;
+  text-align: center;
+  transition: background 0.2s;
+  cursor: default;
+  position: relative;
+}
+.ls:hover { background: var(--orange-bg); border-color: var(--orange); z-index: 1; }
+
+.ls-icon { font-size: 24px; margin-bottom: 10px; }
+.ls-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--ink-4);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.ls-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.ls-desc { font-size: 11px; color: var(--ink-3); line-height: 1.5; }
+
+.loop-footer {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--green);
+  letter-spacing: 1px;
+}
+
+/* ── TWO-SYSTEM DESIGN ── */
+.two-system {
+  display: grid;
+  grid-template-columns: 1fr 60px 1fr;
+  gap: 0;
+  margin-bottom: 16px;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .two-system { grid-template-columns: 1fr; gap: 20px; }
+  .ts-divider { display: none; }
+}
+
+.ts-panel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.ts-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.ts-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.ts-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.1;
+}
+
+.ts-body { padding: 0; }
+
+.ts-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  border-bottom: 1px solid var(--line);
+  min-height: 44px;
+}
+.ts-row:last-child { border-bottom: none; }
+
+.ts-key {
+  padding: 12px 16px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--ink-3);
+  border-right: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  background: var(--surface2);
+  letter-spacing: 0.5px;
+}
+
+.ts-val {
+  padding: 12px 16px;
+  font-size: 12px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}
+
+.ts-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  gap: 8px;
+  position: relative;
+}
+
+.ts-divider::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; left: 50%;
+  width: 1px;
+  background: var(--line);
+}
+
+.ts-arrow-box {
+  background: var(--ink);
+  color: #f0ebe3;
+  padding: 8px 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-align: center;
+  letter-spacing: 1px;
+  line-height: 1.4;
+  position: relative;
+  z-index: 1;
+  width: 50px;
+}
+
+/* ── TRUST BOUNDARY ── */
+.trust-line {
+  background: var(--ink);
+  color: #f0ebe3;
+  padding: 32px 40px;
+  margin-bottom: 48px;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.tl-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--orange);
+  flex-shrink: 0;
+  min-width: 120px;
+}
+
+.tl-flow {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  min-width: 300px;
+}
+
+.tl-node {
+  padding: 8px 16px;
+  border: 1px solid rgba(240,235,227,0.2);
+  color: rgba(240,235,227,0.7);
+  white-space: nowrap;
+}
+.tl-node.highlight {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: rgba(212,83,10,0.1);
+}
+
+.tl-sep {
+  color: rgba(255,255,255,0.2);
+  font-size: 16px;
+}
+
+.tl-verdict {
+  font-size: 12px;
+  color: rgba(240,235,227,0.4);
+  max-width: 240px;
+  font-style: italic;
+  font-family: 'Playfair Display', serif;
+  line-height: 1.5;
+}
+
+/* ── SKILLS SYSTEM ── */
+.skill-lifecycle {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  border: 1px solid var(--line);
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+@media (max-width: 700px) { .skill-lifecycle { grid-template-columns: 1fr 1fr; } }
+
+.slc-step {
+  padding: 24px 16px;
+  border-right: 1px solid var(--line);
+  text-align: center;
+  position: relative;
+  transition: background 0.2s;
+  cursor: default;
+}
+.slc-step:last-child { border-right: none; }
+.slc-step:hover { background: var(--surface); }
+
+.slc-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--ink-4);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.slc-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.slc-desc { font-size: 11px; color: var(--ink-3); line-height: 1.55; }
+
+.skill-evolution-bar {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 28px;
+  margin-bottom: 48px;
+}
+
+.seb-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 20px;
+}
+
+.seb-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 56px 160px;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.seb-row:last-child { margin-bottom: 0; }
+
+.seb-ver {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--ink-3);
+  font-weight: 500;
+}
+
+.seb-bar-wrap {
+  height: 32px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.seb-bar {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
+}
+
+.seb-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.seb-note { font-size: 11px; color: var(--ink-3); line-height: 1.4; }
+
+/* ── TOOLS TABLE ── */
+.tools-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--line);
+  margin-bottom: 48px;
+  font-size: 13px;
+}
+
+.tools-table th {
+  background: var(--ink);
+  color: rgba(240,235,227,0.6);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  text-align: left;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  font-weight: 400;
+}
+.tools-table th:last-child { border-right: none; }
+
+.tools-table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  vertical-align: top;
+}
+.tools-table td:last-child { border-right: none; }
+.tools-table tr:last-child td { border-bottom: none; }
+.tools-table tr:hover td { background: var(--surface); }
+
+.tt-icon-cell { font-size: 20px; text-align: center; }
+.tt-name { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: var(--ink); }
+.tt-badge {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border: 1px solid;
+  margin-top: 4px;
+}
+.badge-core { border-color: rgba(212,83,10,0.4); color: var(--orange); }
+.badge-power { border-color: rgba(42,106,58,0.4); color: var(--green); }
+.badge-meta { border-color: rgba(26,74,122,0.4); color: var(--blue); }
+
+.tt-desc { font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+.tt-desc strong { color: var(--ink); font-weight: 500; }
+.tt-why { margin-top: 6px; font-size: 11px; color: var(--orange); font-family: 'IBM Plex Mono', monospace; }
+
+.tt-stars { color: var(--orange); font-size: 12px; letter-spacing: 2px; }
+
+/* ── IMPLEMENTATION ── */
+.impl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin-bottom: 48px;
+}
+
+@media (max-width: 650px) { .impl-grid { grid-template-columns: 1fr; } }
+
+.impl-cell {
+  background: var(--surface);
+  padding: 28px;
+}
+
+.impl-layer {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+
+.impl-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.impl-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.impl-tech {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  padding: 4px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--line);
+  color: var(--ink-2);
+  letter-spacing: 0.3px;
+}
+
+/* ── CODE ── */
+.code {
+  background: var(--ink);
+  color: #f0ebe3;
+  padding: 28px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 1.9;
+  overflow-x: auto;
+  margin-bottom: 32px;
+  border-left: 3px solid var(--orange);
+}
+.cc { color: rgba(240,235,227,0.3); }
+.ck { color: #e0a060; }
+.cv { color: #90d090; }
+.cs { color: #d0a880; }
+.ct { color: #a0b8e0; }
+.ch { color: var(--orange-light); }
+
+/* ── PRINCIPLES ── */
+.principles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--line);
+  margin-bottom: 48px;
+}
+
+.principle {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  border-bottom: 1px solid var(--line);
+  transition: background 0.2s;
+  cursor: default;
+}
+.principle:last-child { border-bottom: none; }
+.principle:hover { background: var(--orange-bg); }
+
+.pr-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--line);
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--ink-4);
+  padding: 20px;
+  transition: color 0.2s;
+}
+.principle:hover .pr-num { color: var(--orange); }
+
+.pr-body { padding: 20px 24px; }
+.pr-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: 0.3px;
+}
+.pr-text { font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+.pr-text strong { color: var(--orange); font-weight: 400; }
+
+/* ── FORMULA ── */
+.formula-box {
+  background: var(--ink);
+  color: #f0ebe3;
+  padding: 40px;
+  margin-bottom: 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.formula-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(212,83,10,0.12), transparent 60%);
+}
+
+.formula {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(16px, 3vw, 24px);
+  line-height: 1.6;
+  position: relative;
+}
+.formula em { color: var(--orange); font-style: normal; }
+.formula .dim { color: rgba(240,235,227,0.35); }
+.formula .op { color: rgba(240,235,227,0.4); font-family: 'IBM Plex Mono', monospace; font-size: 0.8em; }
+
+.formula-footnote {
+  margin-top: 20px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: rgba(240,235,227,0.3);
+  letter-spacing: 1px;
+  position: relative;
+}
+
+/* ── NOTE ── */
+.note {
+  border-left: 3px solid var(--orange);
+  padding: 16px 20px;
+  background: var(--orange-bg);
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+.note strong { color: var(--orange); font-weight: 500; }
+
+/* ── DIVIDER ── */
+hr { border: none; border-top: 1px solid var(--line); }
+
+/* ── FOOTER ── */
+.footer {
+  background: var(--ink);
+  color: rgba(240,235,227,0.4);
+  padding: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+.footer-brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #f0ebe3;
+  margin-bottom: 8px;
+}
+.footer-sub { font-family: 'IBM Plex Mono', monospace; font-size: 12px; line-height: 1.7; }
+.footer-cols { display: flex; gap: 48px; flex-wrap: wrap; }
+.footer-col-title { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--orange); margin-bottom: 12px; }
+.footer-col-items { font-family: 'IBM Plex Mono', monospace; font-size: 11px; line-height: 2; }
+
+/* ── ANNOTATIONS ── */
+.annotation {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  background: var(--orange-bg);
+  margin-left: 8px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+/* Animate bars on load */
+@keyframes barGrow {
+  from { width: 0; }
+}
+
+.seb-bar { animation: barGrow 1.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ COVER ═══════════════════ -->
+<div class="cover">
+  <div class="cover-top">
+    <div class="cover-logo">AI Agent Design · Final Edition</div>
+    <div class="cover-meta">完整设计方案<br>Synthesized from First Principles</div>
+  </div>
+
+  <div class="cover-body">
+    <div class="cover-issue">完整版 · 终稿</div>
+    <h1 class="cover-h1">
+      <span class="orange">完美</span>不是<br>
+      <span class="italic">功能多，</span><br>
+      而是职责清
+    </h1>
+    <p class="cover-desc">
+      一个 AI Agent 真正需要的：<strong>清晰职责</strong> × <strong>唯一信任边界</strong> × <strong>足够自由度</strong>。<br>
+      工具是地基，Skills 是资产，进化闭环决定斜率。两个系统各管各的事，之间只有一条线。
+    </p>
+    <div class="cover-pillars">
+      <span class="cpillar active">清晰职责</span>
+      <span class="cpillar active">唯一信任边界</span>
+      <span class="cpillar">Skills 主线</span>
+      <span class="cpillar">10 通用工具</span>
+      <span class="cpillar">自主进化</span>
+      <span class="cpillar">最小约束</span>
+    </div>
+  </div>
+
+  <div class="cover-bottom">
+    <div class="cover-principle">"完美不是因为功能多，而是它们之间只有一条明确的信任边界。"</div>
+    <div class="cover-num">DOC · 001</div>
+  </div>
+</div>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav>
+  <a class="nav-item active" href="#philosophy">哲学</a>
+  <a class="nav-item" href="#architecture">架构</a>
+  <a class="nav-item" href="#loop">执行循环</a>
+  <a class="nav-item" href="#two-systems">双系统</a>
+  <a class="nav-item" href="#skills">Skills</a>
+  <a class="nav-item" href="#tools">工具集</a>
+  <a class="nav-item" href="#principles">原则</a>
+  <a class="nav-item" href="#impl">实现</a>
+</nav>
+
+<!-- ═══════════════════ CH1: PHILOSOPHY ═══════════════════ -->
+<div class="chapter" id="philosophy">
+  <div class="ch-number">01 · Philosophy</div>
+  <h2 class="ch-title">设计哲学：<span class="italic">简单是结果，不是捷径</span></h2>
+
+  <div class="philosophy">
+    <div class="phil-text">
+      大多数系统之所以复杂，是因为<em>没想清楚职责边界</em>，所以用复杂度弥补设计的模糊。<br>
+      当每个组件只回答一个问题时，系统自然就小了。
+    </div>
+    <div class="phil-sub">
+      "该改什么" 和 "能不能改" 天然不应该由同一个系统回答——<br>
+      前者需要创造力和自由度，后者需要保守和确定性。
+    </div>
+  </div>
+
+  <div class="principles-list">
+    <div class="principle">
+      <div class="pr-num">①</div>
+      <div class="pr-body">
+        <div class="pr-title">目标是唯一仲裁者</div>
+        <div class="pr-text">评估一切行为只有一个标准：是否更接近目标。不为过程打分，只为结果打分。终止条件由目标决定，不由步骤数决定。</div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">②</div>
+      <div class="pr-body">
+        <div class="pr-title">职责边界只有一条线</div>
+        <div class="pr-text">两个系统之间有且只有一条信任边界。<strong>没有侧门，没有快捷通道</strong>。信任边界的价值不在于它有多复杂，在于它是不是唯一路径。</div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">③</div>
+      <div class="pr-body">
+        <div class="pr-title">最大化 LLM 自由度</div>
+        <div class="pr-text">只定义"不能做什么"，不规定"怎么做"。<strong>过多的 Prompt 约束会扼杀智能涌现</strong>。系统提示只包含：角色定义 + 工具清单 + 硬边界。</div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">④</div>
+      <div class="pr-body">
+        <div class="pr-title">Skills 是动态资产，工具是静态基础</div>
+        <div class="pr-text">工具几乎不变；Skills 持续生长。<strong>两个拥有相同工具集的智能体，Skills 库决定了能力的天花板</strong>。要对接新系统，建 Skill，而不是改架构。</div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">⑤</div>
+      <div class="pr-body">
+        <div class="pr-title">进化必须可验证</div>
+        <div class="pr-text">新策略不直接覆盖旧策略。<strong>必须在受控条件下 A/B 验证</strong>，证明更优后才正式启用。失败是最好的训练信号，但进化不能跑偏。</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ CH2: ARCHITECTURE ═══════════════════ -->
+<div class="chapter" id="architecture">
+  <div class="ch-number">02 · Architecture</div>
+  <h2 class="ch-title">六层架构：<span class="italic">每层只回答一个问题</span></h2>
+
+  <div class="arch-stack">
+
+    <div class="arch-layer">
+      <div class="al-label">
+        <div class="al-num">LAYER 01</div>
+        <div class="al-name" style="color:var(--red)">Goal Layer</div>
+      </div>
+      <div class="al-chips">
+        <span class="chip chip-r">意图解析</span>
+        <span class="chip chip-r">任务分解</span>
+        <span class="chip chip-r">成功指标定义</span>
+        <span class="chip chip-r">子目标树生成</span>
+        <span class="chip chip-r">优先级排序</span>
+        <span class="chip chip-k">→ 回答：我要到哪里去？</span>
+      </div>
+    </div>
+
+    <div class="arch-layer">
+      <div class="al-label">
+        <div class="al-num">LAYER 02</div>
+        <div class="al-name" style="color:var(--blue)">Plan Layer</div>
+      </div>
+      <div class="al-chips">
+        <span class="chip chip-b">ReAct 推理循环</span>
+        <span class="chip chip-b">动态重规划</span>
+        <span class="chip chip-b">依赖图管理</span>
+        <span class="chip chip-b">并行任务调度</span>
+        <span class="chip chip-b">死锁检测</span>
+        <span class="chip chip-k">→ 回答：怎么走最优？</span>
+      </div>
+    </div>
+
+    <div class="arch-layer">
+      <div class="al-label">
+        <div class="al-num">LAYER 03</div>
+        <div class="al-name" style="color:var(--orange)">LLM Core</div>
+      </div>
+      <div class="al-chips">
+        <span class="chip chip-o">上下文管理</span>
+        <span class="chip chip-o">思维链推理</span>
+        <span class="chip chip-o">工具调用决策</span>
+        <span class="chip chip-o">结果评估</span>
+        <span class="chip chip-o">自我反思</span>
+        <span class="chip chip-o">最小系统提示</span>
+        <span class="chip chip-k">→ 回答：下一步做什么？</span>
+      </div>
+    </div>
+
+    <div class="arch-layer">
+      <div class="al-label">
+        <div class="al-num">LAYER 04</div>
+        <div class="al-name" style="color:var(--green)">Skill + Tool Layer</div>
+      </div>
+      <div class="al-chips">
+        <span class="chip chip-g">Skill 调用与编排</span>
+        <span class="chip chip-g">Code Runner</span>
+        <span class="chip chip-g">HTTP Caller</span>
+        <span class="chip chip-g">Search+Fetch</span>
+        <span class="chip chip-g">File System</span>
+        <span class="chip chip-g">Memory R/W</span>
+        <span class="chip chip-g">Sub-Agent</span>
+        <span class="chip chip-k">→ 回答：怎么执行？</span>
+      </div>
+    </div>
+
+    <div class="arch-layer">
+      <div class="al-label">
+        <div class="al-num">LAYER 05</div>
+        <div class="al-name" style="color:#7a5a9a">Evolution Layer</div>
+      </div>
+      <div class="al-chips">
+        <span class="chip" style="border-color:rgba(122,90,154,0.3);color:#7a5a9a;background:rgba(122,90,154,0.05)">self-evolution-governor</span>
+        <span class="chip" style="border-color:rgba(122,90,154,0.3);color:#7a5a9a;background:rgba(122,90,154,0.05)">经验提炼</span>
+        <span class="chip" style="border-color:rgba(122,90,154,0.3);color:#7a5a9a;background:rgba(122,90,154,0.05)">失败复盘</span>
+        <span class="chip" style="border-color:rgba(122,90,154,0.3);color:#7a5a9a;background:rgba(122,90,154,0.05)">Skill 生成进化</span>
+        <span class="chip" style="border-color:rgba(122,90,154,0.3);color:#7a5a9a;background:rgba(122,90,154,0.05)">提案生成</span>
+        <span class="chip chip-k">→ 回答：该改什么？</span>
+      </div>
+    </div>
+
+    <div class="arch-layer" style="background:rgba(138,26,26,0.03)">
+      <div class="al-label">
+        <div class="al-num">LAYER 06</div>
+        <div class="al-name" style="color:var(--red)">Hard Boundary</div>
+      </div>
+      <div class="al-chips">
+        <span class="chip chip-r">ops-gate（独立于 LLM）</span>
+        <span class="chip chip-r">precheck 条件验证</span>
+        <span class="chip chip-r">不可逆操作拦截</span>
+        <span class="chip chip-r">不可篡改审计日志</span>
+        <span class="chip chip-r">沙箱隔离</span>
+        <span class="chip chip-r">人工确认钩子</span>
+        <span class="chip chip-k">→ 回答：能不能改？</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════ CH3: LOOP ═══════════════════ -->
+<div class="chapter" id="loop">
+  <div class="ch-number">03 · Execution Loop</div>
+  <h2 class="ch-title">自主推理闭环：<span class="italic">唯一终止条件是目标达成</span></h2>
+
+  <div class="loop-diagram">
+    <div class="loop-header">// 单次任务执行循环 — 未达目标则无限迭代</div>
+    <div class="loop-steps">
+      <div class="ls">
+        <div class="ls-icon">👁</div>
+        <div class="ls-num">01</div>
+        <div class="ls-name">Perceive</div>
+        <div class="ls-desc">接收目标、上下文、当前环境状态、Memory 召回</div>
+      </div>
+      <div class="ls">
+        <div class="ls-icon">🧠</div>
+        <div class="ls-num">02</div>
+        <div class="ls-name">Think</div>
+        <div class="ls-desc">CoT 推理，分解问题，匹配已有 Skills，选择策略</div>
+      </div>
+      <div class="ls">
+        <div class="ls-icon">📋</div>
+        <div class="ls-num">03</div>
+        <div class="ls-name">Plan</div>
+        <div class="ls-desc">生成动作序列，确定工具调用清单，识别可并行子任务</div>
+      </div>
+      <div class="ls">
+        <div class="ls-icon">⚡</div>
+        <div class="ls-num">04</div>
+        <div class="ls-name">Act</div>
+        <div class="ls-desc">并行/串行执行工具，经过 ops-gate 硬边界守卫</div>
+      </div>
+      <div class="ls">
+        <div class="ls-icon">📡</div>
+        <div class="ls-num">05</div>
+        <div class="ls-name">Observe</div>
+        <div class="ls-desc">收集工具返回，感知环境变化，更新 Working Memory</div>
+      </div>
+      <div class="ls">
+        <div class="ls-icon">⚖️</div>
+        <div class="ls-num">06</div>
+        <div class="ls-name">Evaluate</div>
+        <div class="ls-desc">目标完成？→ 结束并触发进化。未完成？→ 回到 02</div>
+      </div>
+    </div>
+    <div class="loop-footer">↻ 未达目标 → 更新状态 → 回到 Think，带着新的观察重新推理</div>
+  </div>
+
+  <div class="code">
+<span class="cc">// 核心循环伪代码 — 简洁是刻意的</span>
+<span class="ct">async function</span> <span class="ck">agentLoop</span>(goal: <span class="ct">Goal</span>) {
+  <span class="ct">const</span> state = <span class="cv">initState</span>(goal);
+
+  <span class="ct">while</span> (!<span class="cv">isGoalMet</span>(state)) {
+    <span class="cc">// Think — LLM 自由推理，不加约束</span>
+    <span class="ct">const</span> plan = <span class="cv">await llm.reason</span>(state, tools.registry, memory.recall(state));
+
+    <span class="cc">// Act — 并行执行，全部经过 ops-gate</span>
+    <span class="ct">const</span> results = <span class="cv">await</span> Promise.all(
+      plan.actions.map(a => opsGate.<span class="cv">intercept</span>(a).then(<span class="ch">execute</span>))
+    );
+
+    <span class="cc">// Observe + Update</span>
+    state.<span class="cv">update</span>(results);
+    memory.<span class="cv">write</span>(state.episode);
+
+    <span class="cc">// 防止死循环的唯一硬上限</span>
+    <span class="ct">if</span> (state.iterations > HARD_LIMIT) <span class="ct">break</span>;
+  }
+
+  <span class="cc">// 任务结束 → 触发异步进化（不阻塞结果）</span>
+  evolutionGovernor.<span class="cv">consolidate</span>(state.episode);
+}
+  </div>
+</div>
+
+<!-- ═══════════════════ CH4: TWO SYSTEMS ═══════════════════ -->
+<div class="chapter" id="two-systems">
+  <div class="ch-number">04 · The Two-System Design</div>
+  <h2 class="ch-title">双系统设计：<span class="italic">各管各的事</span></h2>
+
+  <div class="note">
+    <strong>核心洞察：</strong> "该改什么"和"能不能改"天然不应该由同一个系统回答。把两个问题放在一起，要么创造力被保守压死，要么安全被自由绕过。分开，两个系统都能做到极致。
+  </div>
+
+  <div class="two-system">
+
+    <!-- LEFT: self-evolution-governor -->
+    <div class="ts-panel">
+      <div class="ts-header" style="border-top: 3px solid #7a5a9a;">
+        <div class="ts-tag" style="color:#7a5a9a">自由侧 · Creative Side</div>
+        <div class="ts-name">self-evolution-governor</div>
+      </div>
+      <div class="ts-body">
+        <div class="ts-row">
+          <div class="ts-key">核心问题</div>
+          <div class="ts-val" style="color:#7a5a9a;font-weight:500">该改什么？</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">职责</div>
+          <div class="ts-val">想"该改什么"、生成提案、判断该不该说</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">可以动</div>
+          <div class="ts-val">state / evolution / Skills / system prompt 注入</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">不可动</div>
+          <div class="ts-val" style="color:var(--red)">正式系统（service / scripts / config）</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">输出</div>
+          <div class="ts-val">纯数据 Proposal（不是可执行代码）</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">特性</div>
+          <div class="ts-val">需要创造力，允许大胆，失败不产生副作用</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="ts-divider">
+      <div class="ts-arrow-box">唯一<br>接口<br>↓</div>
+    </div>
+
+    <!-- RIGHT: ops-gate -->
+    <div class="ts-panel">
+      <div class="ts-header" style="border-top: 3px solid var(--red);">
+        <div class="ts-tag" style="color:var(--red)">保守侧 · Safety Side</div>
+        <div class="ts-name">ops-gate</div>
+      </div>
+      <div class="ts-body">
+        <div class="ts-row">
+          <div class="ts-key">核心问题</div>
+          <div class="ts-val" style="color:var(--red);font-weight:500">能不能改？</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">职责</div>
+          <div class="ts-val">管"怎么安全地改"、验证提案可执行、precheck 条件齐不齐</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">可以动</div>
+          <div class="ts-val">正式系统（service / scripts / config）</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">不生产</div>
+          <div class="ts-val" style="color:var(--red)">"要不要改"的想法（那是 governor 的事）</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">输入</div>
+          <div class="ts-val">用户批准后的 Proposal（只接受这一条线）</div>
+        </div>
+        <div class="ts-row">
+          <div class="ts-key">特性</div>
+          <div class="ts-val">保守确定，留存 evidence 审计，不可被说服绕过</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TRUST BOUNDARY -->
+  <div class="trust-line">
+    <div class="tl-label">唯一信任边界</div>
+    <div class="tl-flow">
+      <span class="tl-node">self-evolution-governor</span>
+      <span class="tl-sep">→</span>
+      <span class="tl-node">生成 Proposal</span>
+      <span class="tl-sep">→</span>
+      <span class="tl-node highlight">用户批准</span>
+      <span class="tl-sep">→</span>
+      <span class="tl-node">proposal_router</span>
+      <span class="tl-sep">→</span>
+      <span class="tl-node">ops-gate</span>
+      <span class="tl-sep">→</span>
+      <span class="tl-node">执行</span>
+    </div>
+    <div class="tl-verdict">governor 绝不绕过 ops-gate 直接执行。ops-gate 绝不自己产生"要不要改"的想法。</div>
+  </div>
+
+  <div class="code">
+<span class="cc">// ops-gate：独立于 LLM 的硬边界守卫</span>
+<span class="cc">// LLM 永远无法"说服"它绕过规则，因为规则根本不经过 LLM</span>
+<span class="ct">class</span> <span class="ck">OpsGate</span> {
+  <span class="ct">private readonly</span> rules: <span class="ct">ImmutableRuleSet</span>; <span class="cc">// 运行时不可修改</span>
+
+  <span class="ck">intercept</span>(action: <span class="ct">ToolCall</span>): <span class="ct">Decision</span> {
+    <span class="cc">// ① precheck：条件齐不齐</span>
+    <span class="ct">if</span> (!this.<span class="cv">precheck</span>(action)) <span class="ct">return</span> REJECT(<span class="cs">'preconditions_not_met'</span>);
+
+    <span class="cc">// ② 不可逆操作：必须有人工批准凭据</span>
+    <span class="ct">if</span> (this.<span class="cv">isIrreversible</span>(action) && !action.humanApproval)
+      <span class="ct">return</span> HOLD(<span class="cs">'awaiting_human_approval'</span>);
+
+    <span class="cc">// ③ 迭代硬上限：防止死循环</span>
+    <span class="ct">if</span> (this.callCount >= this.rules.MAX_CALLS)
+      <span class="ct">return</span> REJECT(<span class="cs">'hard_limit_exceeded'</span>);
+
+    <span class="cc">// ④ 必须写入不可篡改审计日志（evidence）</span>
+    this.auditLog.<span class="cv">append</span>({ action, ts: Date.now(), agentId, sessionId });
+
+    <span class="ct">return</span> ALLOW;
+  }
+}
+  </div>
+</div>
+
+<!-- ═══════════════════ CH5: SKILLS ═══════════════════ -->
+<div class="chapter" id="skills">
+  <div class="ch-number">05 · Skills — The Main Thread</div>
+  <h2 class="ch-title">Skills 是主线：<span class="italic">动态生长的智能资产</span></h2>
+
+  <div class="note">
+    <strong>核心认知：</strong> Skills ≠ 工具调用。Skills 是封装了"解决某类问题全部知识"的完整工作流单元——包括何时用哪个工具、遇到什么情况怎么处理、输出什么格式、如何判断成功。要对接新系统？建一个 Skill。
+  </div>
+
+  <div class="skill-lifecycle">
+    <div class="slc-step">
+      <div class="slc-num" style="color:var(--red)">1</div>
+      <div class="slc-name" style="color:var(--red)">发现</div>
+      <div class="slc-desc">遇到没有现成 Skill 的任务，触发 Skill Forge</div>
+    </div>
+    <div class="slc-step">
+      <div class="slc-num" style="color:var(--orange)">2</div>
+      <div class="slc-name" style="color:var(--orange)">生成</div>
+      <div class="slc-desc">LLM 分析任务类型，自动拟定工具链和执行策略</div>
+    </div>
+    <div class="slc-step">
+      <div class="slc-num" style="color:var(--blue)">3</div>
+      <div class="slc-name" style="color:var(--blue)">验证</div>
+      <div class="slc-desc">沙箱执行 3–5 次，采集成功率、错误、耗时</div>
+    </div>
+    <div class="slc-step">
+      <div class="slc-num" style="color:var(--green)">4</div>
+      <div class="slc-name" style="color:var(--green)">入库</div>
+      <div class="slc-desc">成功率 &gt; 80% 进入技能库，可被其他 Skill 调用</div>
+    </div>
+    <div class="slc-step">
+      <div class="slc-num" style="color:#7a5a9a">5</div>
+      <div class="slc-name" style="color:#7a5a9a">进化</div>
+      <div class="slc-desc">每次执行采集信号，A/B 竞争，永不停止迭代</div>
+    </div>
+  </div>
+
+  <div class="skill-evolution-bar">
+    <div class="seb-title">// Skill 成熟度随版本进化（示例：CRM 数据处理 Skill）</div>
+    <div class="seb-row">
+      <div class="seb-ver">v1.0</div>
+      <div class="seb-bar-wrap"><div class="seb-bar" style="width:33%;background:rgba(138,26,26,0.15);color:var(--red)">初始生成，串行执行</div></div>
+      <div class="seb-pct" style="color:var(--red)">33%</div>
+      <div class="seb-note">工具选择不当，频繁超时</div>
+    </div>
+    <div class="seb-row">
+      <div class="seb-ver">v1.3</div>
+      <div class="seb-bar-wrap"><div class="seb-bar" style="width:61%;background:rgba(212,83,10,0.15);color:var(--orange)">复盘后调整工具顺序</div></div>
+      <div class="seb-pct" style="color:var(--orange)">61%</div>
+      <div class="seb-note">错误处理改善，无重试逻辑</div>
+    </div>
+    <div class="seb-row">
+      <div class="seb-ver">v2.0</div>
+      <div class="seb-bar-wrap"><div class="seb-bar" style="width:82%;background:rgba(26,74,122,0.15);color:var(--blue)">引入并行 + 自动重试</div></div>
+      <div class="seb-pct" style="color:var(--blue)">82%</div>
+      <div class="seb-note">进入 stable 状态，可被复用</div>
+    </div>
+    <div class="seb-row">
+      <div class="seb-ver">v2.5</div>
+      <div class="seb-bar-wrap"><div class="seb-bar" style="width:95%;background:rgba(42,106,58,0.15);color:var(--green)">提炼出子 Skill 复用</div></div>
+      <div class="seb-pct" style="color:var(--green)">95%</div>
+      <div class="seb-note">已成为同类任务的标准 SOP</div>
+    </div>
+  </div>
+
+  <div class="code">
+<span class="cc">// 一个 Skill 的完整结构</span>
+<span class="ct">interface</span> <span class="ck">Skill</span> {
+  id:        <span class="cs">"salesforce.lead_scoring_v2"</span>,
+  trigger:   <span class="cs">"当有新 Salesforce 线索需要评分时"</span>,   <span class="cc">// 意图匹配触发</span>
+  version:   <span class="cs">"2.5"</span>,
+  success_rate: <span class="cv">0.95</span>,
+
+  tool_chain: [
+    { tool: <span class="cs">"http_caller"</span>,  action: <span class="cs">"GET /leads/{id}"</span>,            seq: <span class="cv">1</span>, parallel: <span class="cv">false</span> },
+    { tool: <span class="cs">"search_fetch"</span>, action: <span class="cs">"搜索公司官网信息"</span>,            seq: <span class="cv">2</span>, parallel: <span class="cv">true</span>  },
+    { tool: <span class="cs">"memory_read"</span>,  action: <span class="cs">"召回同类线索历史评分"</span>,        seq: <span class="cv">2</span>, parallel: <span class="cv">true</span>  },
+    { tool: <span class="cs">"code_runner"</span>,  action: <span class="cs">"执行评分算法"</span>,                seq: <span class="cv">3</span>, parallel: <span class="cv">false</span> },
+    { tool: <span class="cs">"http_caller"</span>,  action: <span class="cs">"PATCH /leads/{id}"</span>,            seq: <span class="cv">4</span>, parallel: <span class="cv">false</span>, irreversible: <span class="cv">true</span> },
+    { tool: <span class="cs">"memory_write"</span>, action: <span class="cs">"记录本次评分经验"</span>,            seq: <span class="cv">5</span>, parallel: <span class="cv">false</span> },
+  ],
+
+  evolution_signals: {
+    trigger_upgrade:  <span class="cs">"连续3次失败 or 耗时超过基准2倍"</span>,
+    success_metric:   <span class="cs">"评分与实际转化率相关性 > 0.7"</span>,
+    optimize_target:  <span class="cs">"减少 HTTP 调用次数"</span>,
+  }
+}
+  </div>
+</div>
+
+<!-- ═══════════════════ CH6: TOOLS ═══════════════════ -->
+<div class="chapter" id="tools">
+  <div class="ch-number">06 · Universal Tools</div>
+  <h2 class="ch-title">10 个工具：<span class="italic">覆盖 95% 场景</span></h2>
+
+  <div class="note">
+    <strong>设计原则：</strong> 工具粒度要"恰到好处"。太细（每个 API 一个工具）→ 注册表爆炸，LLM 选择困难；太粗 → 失去精确控制。<strong>工具要精，但每个要深</strong>。每增加一个工具，LLM 选择复杂度就上升。
+  </div>
+
+  <table class="tools-table">
+    <thead>
+      <tr>
+        <th style="width:48px"></th>
+        <th style="width:180px">工具</th>
+        <th>能力 · 用途 · 为什么必须有</th>
+        <th style="width:80px;text-align:center">优先级</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="tt-icon-cell">💻</td>
+        <td>
+          <div class="tt-name">Code Runner</div>
+          <div><span class="tt-badge badge-core">CORE</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>沙箱执行任意代码（Python/JS/Bash）</strong>，返回 stdout / stderr / 文件产物。理论上可替代其他所有工具，但用它模拟其他工具太重，所以只做计算和处理逻辑。</div>
+          <div class="tt-why">→ 有了它就有无限计算能力，是 LLM 从"说话者"变为"行动者"的核心</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★★</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">🌐</td>
+        <td>
+          <div class="tt-name">HTTP Caller</div>
+          <div><span class="tt-badge badge-core">CORE</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>带认证管理的 HTTP/REST/GraphQL</strong>，支持 OAuth / API Key / Bearer 自动注入，响应解析全自动。</div>
+          <div class="tt-why">→ 有了它就连通万物，是突破单机局限的关键通道</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★★</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">🔍</td>
+        <td>
+          <div class="tt-name">Search + Fetch</div>
+          <div><span class="tt-badge badge-core">CORE</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>网络搜索 + 网页完整内容提取</strong>，支持动态页面（Playwright），自动 Markdown 化。</div>
+          <div class="tt-why">→ 突破 LLM 知识截止日期，实时信息获取不可或缺</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★★</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">📁</td>
+        <td>
+          <div class="tt-name">File System</div>
+          <div><span class="tt-badge badge-core">CORE</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>文本/JSON/CSV/PDF/Office 读写</strong>，大文件分块处理，支持云存储挂载（S3/GCS）。</div>
+          <div class="tt-why">→ 任务中间产物和最终输出的持久化载体，智能体的"硬盘"</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★☆</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">🧠</td>
+        <td>
+          <div class="tt-name">Memory R/W</div>
+          <div><span class="tt-badge badge-core">CORE</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>向量检索 + KV 存取 + 知识图谱</strong>，统一封装四层记忆（工作/情节/语义/程序），写入自动生成 embedding。</div>
+          <div class="tt-why">→ 跨会话学习和知识复用的根基，没有它智能体每次都从零开始</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★★</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">🤖</td>
+        <td>
+          <div class="tt-name">Sub-Agent</div>
+          <div><span class="tt-badge badge-power">POWER</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>启动专用子智能体处理子任务</strong>，同步等待或异步回调，子 Agent 共享父级工具权限（可限制）。</div>
+          <div class="tt-why">→ 复杂任务分治，是系统扩展性的核心，让智能体可以无限延伸</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★☆</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">🗄️</td>
+        <td>
+          <div class="tt-name">Database</div>
+          <div><span class="tt-badge badge-power">POWER</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>直连 SQL/NoSQL</strong>（PostgreSQL/MySQL/MongoDB/Redis），自然语言 → SQL，结果自动序列化。</div>
+          <div class="tt-why">→ 处理结构化数据比绕道 HTTP API 快 10 倍，企业场景刚需</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★☆</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">📬</td>
+        <td>
+          <div class="tt-name">Notify Hub</div>
+          <div><span class="tt-badge badge-power">POWER</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>统一发送接口</strong>（Email/Slack/钉钉/Webhook/SMS），也接收回调，是人工审批流的实现载体。</div>
+          <div class="tt-why">→ 不可逆操作的人工确认钩子，ops-gate 的通知通道</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★☆☆</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">👁</td>
+        <td>
+          <div class="tt-name">Vision + OCR</div>
+          <div><span class="tt-badge badge-power">POWER</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>图像/截图理解 + 文字提取</strong>，扫描件 OCR，图表解读，UI 状态识别，让 Agent 能"看"。</div>
+          <div class="tt-why">→ 大量现实数据以图片存在，没有视觉能力会遇到大量瓶颈</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars">★★★★☆</div></td>
+      </tr>
+      <tr>
+        <td class="tt-icon-cell">🔧</td>
+        <td>
+          <div class="tt-name">Skill Forge</div>
+          <div><span class="tt-badge badge-meta">META</span></div>
+        </td>
+        <td>
+          <div class="tt-desc"><strong>元工具：自动生成、测试、注册新 Skill</strong>。当反复解决同类问题时，自动提炼成功工作流并写入技能库。</div>
+          <div class="tt-why">→ 自进化的关键，让 Skills 从 0 生长，智能体越用越强</div>
+        </td>
+        <td style="text-align:center"><div class="tt-stars" style="color:#7a5a9a">★★★★★</div></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════ CH7: PRINCIPLES ═══════════════════ -->
+<div class="chapter" id="principles">
+  <div class="ch-number">07 · The Formula</div>
+  <h2 class="ch-title">能力公式：<span class="italic">简洁的方程，深刻的含义</span></h2>
+
+  <div class="formula-box">
+    <div class="formula">
+      <em>Agent Capability</em>
+      <span class="op"> = </span>
+      <em>Tools</em><span class="dim">（地基，几乎不变）</span>
+      <br>
+      <span class="op">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;×&nbsp;</span>
+      <em>Skills</em><span class="dim">（资产，持续生长）</span>
+      <br>
+      <span class="op">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;×&nbsp;</span>
+      <em>Evolution Loop</em><span class="dim">（斜率，决定上限速度）</span>
+      <br>
+      <span class="op">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;÷&nbsp;</span>
+      <em>Constraints</em><span class="dim">（越少越好，只保留硬边界）</span>
+    </div>
+    <div class="formula-footnote">工具是下限 · Skills 是上限 · 进化闭环决定斜率 · 约束是分母</div>
+  </div>
+
+  <div class="principles-list">
+    <div class="principle">
+      <div class="pr-num">1</div>
+      <div class="pr-body">
+        <div class="pr-title">每个组件只回答一个问题</div>
+        <div class="pr-text">系统复杂度的根源是"职责不清"。当每个模块只负责一个问题时，复杂度自然收敛。<strong>不要用复杂度弥补设计的模糊。</strong></div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">2</div>
+      <div class="pr-body">
+        <div class="pr-title">信任边界有且只有一条线</div>
+        <div class="pr-text">governor → 用户批准 → ops-gate。<strong>没有侧门，没有快捷通道。</strong> 边界的价值不在于它复杂，在于它是唯一路径。</div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">3</div>
+      <div class="pr-body">
+        <div class="pr-title">硬边界必须独立于 LLM</div>
+        <div class="pr-text">ops-gate 是代码层，不是 Prompt 层。<strong>LLM 永远无法"说服"规则，因为规则根本不经过 LLM。</strong> 这才是真正的安全。</div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">4</div>
+      <div class="pr-body">
+        <div class="pr-title">Proposal 是纯数据，不是可执行代码</div>
+        <div class="pr-text">governor 的输出可以被暂停、被审计、被拒绝、被人介入，不产生任何副作用。<strong>这才是"人在回路"的正确实现。</strong></div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">5</div>
+      <div class="pr-body">
+        <div class="pr-title">进化在运行中发生，但不在进化中崩溃</div>
+        <div class="pr-text">governor 只动 state/evolution/Skills，不碰正式系统。系统可以<strong>在运行中学习，但不会在学习中崩溃。</strong></div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">6</div>
+      <div class="pr-body">
+        <div class="pr-title">失败是最好的数据，但进化要有验证</div>
+        <div class="pr-text">新策略不直接覆盖旧策略，必须 A/B 验证。<strong>防止越学越差是自进化系统的最大陷阱。</strong></div>
+      </div>
+    </div>
+    <div class="principle">
+      <div class="pr-num">7</div>
+      <div class="pr-body">
+        <div class="pr-title">全程可观测，黑盒无法信任</div>
+        <div class="pr-text">每个决策节点、每次工具调用、每轮迭代都留有追踪。<strong>可观测性不是可选项，是 ops-gate 审计能力的前提。</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ CH8: IMPLEMENTATION ═══════════════════ -->
+<div class="chapter" id="impl">
+  <div class="ch-number">08 · Implementation Stack</div>
+  <h2 class="ch-title">技术选型：<span class="italic">每层对应最优选择</span></h2>
+
+  <div class="impl-grid">
+    <div class="impl-cell">
+      <div class="impl-layer">LLM Core</div>
+      <div class="impl-title">推理引擎</div>
+      <div class="impl-stack">
+        <span class="impl-tech">GPT-4o</span>
+        <span class="impl-tech">Claude 3.7</span>
+        <span class="impl-tech">Gemini 2.0</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Agent Framework</div>
+      <div class="impl-title">编排控制</div>
+      <div class="impl-stack">
+        <span class="impl-tech">自研 Loop（推荐）</span>
+        <span class="impl-tech">LangGraph</span>
+        <span class="impl-tech">AutoGen</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Code Execution</div>
+      <div class="impl-title">沙箱运行</div>
+      <div class="impl-stack">
+        <span class="impl-tech">E2B</span>
+        <span class="impl-tech">Docker</span>
+        <span class="impl-tech">Deno Sandbox</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Vector Memory</div>
+      <div class="impl-title">情节记忆</div>
+      <div class="impl-stack">
+        <span class="impl-tech">pgvector</span>
+        <span class="impl-tech">Weaviate</span>
+        <span class="impl-tech">Pinecone</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Knowledge Graph</div>
+      <div class="impl-title">语义记忆</div>
+      <div class="impl-stack">
+        <span class="impl-tech">Neo4j</span>
+        <span class="impl-tech">Memgraph</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Workflow State</div>
+      <div class="impl-title">任务状态持久化</div>
+      <div class="impl-stack">
+        <span class="impl-tech">Redis</span>
+        <span class="impl-tech">PostgreSQL</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Skill Registry</div>
+      <div class="impl-title">技能库管理</div>
+      <div class="impl-stack">
+        <span class="impl-tech">PostgreSQL + JSON</span>
+        <span class="impl-tech">版本控制</span>
+        <span class="impl-tech">A/B 测试框架</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Audit Log</div>
+      <div class="impl-title">不可篡改审计</div>
+      <div class="impl-stack">
+        <span class="impl-tech">ClickHouse</span>
+        <span class="impl-tech">Loki</span>
+        <span class="impl-tech">append-only</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Observability</div>
+      <div class="impl-title">全链路追踪</div>
+      <div class="impl-stack">
+        <span class="impl-tech">Langfuse</span>
+        <span class="impl-tech">LangSmith</span>
+        <span class="impl-tech">OpenTelemetry</span>
+      </div>
+    </div>
+    <div class="impl-cell">
+      <div class="impl-layer">Notification</div>
+      <div class="impl-title">人工审批通道</div>
+      <div class="impl-stack">
+        <span class="impl-tech">Slack</span>
+        <span class="impl-tech">Email</span>
+        <span class="impl-tech">钉钉 / 飞书</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="code">
+<span class="cc">// 最终架构全景 — 一眼看懂</span>
+
+<span class="ch">┌─────────────────────────────────────────────────────────┐</span>
+<span class="ch">│  GOAL LAYER    意图解析 → 任务分解 → 成功指标定义         │</span>
+<span class="ch">├─────────────────────────────────────────────────────────┤</span>
+<span class="ch">│  PLAN LAYER    ReAct 推理 → 动态规划 → 并行调度           │</span>
+<span class="ch">├─────────────────────────────────────────────────────────┤</span>
+<span class="ch">│  LLM CORE      最小系统提示 │ 工具清单 │ 硬边界规则        │</span>
+<span class="ch">├─────────────────────────────────────────────────────────┤</span>
+<span class="ch">│  SKILL LAYER   Skill 匹配 → 工具编排 → 并行执行           │</span>
+<span class="ch">│  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─  │</span>
+<span class="ch">│  TOOL LAYER    Code │ HTTP │ Search │ File │ Memory       │</span>
+<span class="ch">│                Sub-Agent │ DB │ Notify │ Vision │ Forge   │</span>
+<span class="ch">├─────────────────────────────────────────────────────────┤</span>
+<span class="ch">│  EVOLUTION     self-evolution-governor                   │</span>
+<span class="ch">│                想"该改什么" → 生成 Proposal → 仅此而已   │</span>
+<span class="ch">│                ↓ 唯一接口（用户批准后）                  │</span>
+<span class="ch">│                proposal_router                           │</span>
+<span class="ch">│                ↓                                         │</span>
+<span class="ch">├─────────────────────────────────────────────────────────┤</span>
+<span class="ch">│  OPS-GATE      管"能不能改" → precheck → 执行 → audit    │</span>
+<span class="ch">│  （独立于LLM）  不可逆操作 → 人工确认钩子                 │</span>
+<span class="ch">└─────────────────────────────────────────────────────────┘</span>
+
+<span class="cc">// 完美不是功能多，而是它们之间只有一条明确的信任边界。</span>
+  </div>
+</div>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="footer">
+  <div>
+    <div class="footer-brand">AI Agent</div>
+    <div class="footer-sub">
+      Complete Design · Final Edition<br>
+      Goal-Driven · Skills-First · Self-Evolving
+    </div>
+  </div>
+  <div class="footer-cols">
+    <div>
+      <div class="footer-col-title">核心原则</div>
+      <div class="footer-col-items">
+        职责清晰<br>
+        唯一信任边界<br>
+        最小约束<br>
+        可验证进化
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">关键组件</div>
+      <div class="footer-col-items">
+        self-evolution-governor<br>
+        ops-gate<br>
+        Skill Forge<br>
+        10 Universal Tools
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">能力公式</div>
+      <div class="footer-col-items">
+        Tools × Skills<br>
+        × Evolution Loop<br>
+        ÷ Constraints<br>
+        = Capability
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav highlight on scroll
+const chapters = document.querySelectorAll('.chapter');
+const navItems = document.querySelectorAll('.nav-item');
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const id = e.target.id;
+      navItems.forEach(n => {
+        n.classList.toggle('active', n.getAttribute('href') === '#' + id);
+      });
+    }
+  });
+}, { rootMargin: '-40% 0px -50% 0px' });
+
+chapters.forEach(c => io.observe(c));
+</script>
+</body>
+</html>

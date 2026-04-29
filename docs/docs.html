@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury Documentation — Installation, Providers, Telegram, and Daemon Mode</title>
+  <meta name="description"
+    content="Complete documentation for Mercury AI agent. Installation, CLI commands, daemon mode, Telegram pairing, provider configuration, in-chat commands, and platform-specific service setup.">
+  <meta name="author" content="Cosmic Stack">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="canonical" href="https://mercury.cosmicstack.org/docs.html">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☿</text></svg>">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 48px;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 32px 24px 100px;
+    }
+
+    .docs-sidebar {
+      position: sticky;
+      top: 72px;
+      align-self: start;
+      max-height: calc(100vh - 96px);
+      overflow-y: auto;
+    }
+
+    .docs-sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .docs-sidebar a {
+      color: var(--gray);
+      font-size: 0.9em;
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .docs-sidebar a:hover,
+    .docs-sidebar a.active {
+      color: var(--cyan);
+      background: var(--cyan-glow);
+    }
+
+    .docs-sidebar .sidebar-heading {
+      font-family: var(--font);
+      font-size: 0.75em;
+      color: var(--gray-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 20px;
+      margin-bottom: 4px;
+      padding-left: 12px;
+    }
+
+    .docs-content h2 {
+      font-size: 1.6em;
+      margin-top: 56px;
+      margin-bottom: 12px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .docs-content h2:first-child {
+      margin-top: 0;
+      border-top: none;
+    }
+
+    .docs-content h3 {
+      font-size: 1.15em;
+      margin-top: 32px;
+      margin-bottom: 8px;
+    }
+
+    .docs-content p {
+      color: var(--gray);
+      line-height: 1.75;
+      margin-bottom: 16px;
+    }
+
+    .docs-content ul,
+    .docs-content ol {
+      color: var(--gray);
+      margin-left: 20px;
+      margin-bottom: 16px;
+      line-height: 1.8;
+    }
+
+    .docs-content li {
+      margin-bottom: 4px;
+    }
+
+    .docs-content strong {
+      color: var(--white);
+    }
+
+    .cmd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+    }
+
+    .cmd-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: var(--bg-card);
+      color: var(--cyan);
+      font-family: var(--font);
+      font-size: 0.8em;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cmd-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--gray);
+      font-size: 0.92em;
+    }
+
+    .cmd-table td:first-child {
+      font-family: var(--font);
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+
+    .cmd-table tr:hover td {
+      background: rgba(0, 212, 255, 0.03);
+    }
+
+    .platform-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .platform-tab {
+      font-family: var(--font);
+      font-size: 0.85em;
+      padding: 8px 20px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--gray);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .platform-tab:hover {
+      border-color: var(--cyan-dim);
+      color: var(--white);
+    }
+
+    .platform-tab.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-glow);
+    }
+
+    .platform-content {
+      display: none;
+    }
+
+    .platform-content.active {
+      display: block;
+    }
+
+    .callout {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--cyan);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+
+    .callout p {
+      margin-bottom: 0;
+    }
+
+    .callout-title {
+      color: var(--cyan);
+      font-weight: 600;
+      font-size: 0.95em;
+      margin-bottom: 4px;
+    }
+
+    .callout-warn {
+      border-left-color: var(--yellow);
+    }
+
+    .callout-warn .callout-title {
+      color: var(--yellow);
+    }
+
+    @media (max-width: 900px) {
+      .docs-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .docs-sidebar {
+        position: static;
+        max-height: none;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+      }
+
+      .docs-sidebar nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .docs-sidebar .sidebar-heading {
+        width: 100%;
+      }
+    }
+
+    .github-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border);
+      color: var(--gray) !important;
+      padding: 4px 12px 4px 10px;
+      border-radius: 6px;
+      font-size: 0.85em;
+      font-weight: 500;
+      text-decoration: none !important;
+      transition: all 0.2s;
+    }
+
+    .github-btn:hover {
+      border-color: #444;
+      color: var(--white) !important;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .github-btn svg {
+      flex-shrink: 0;
+    }
+
+    .github-btn-text {
+      font-size: 0.95em;
+      font-weight: 600;
+    }
+
+    .github-btn-count {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(255,255,255,0.06);
+      border-left: 1px solid var(--border);
+      margin-left: 2px;
+      margin-right: -6px;
+      padding: 3px 8px;
+      border-radius: 0 5px 5px 0;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <nav id="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">☿ Mercury</a>
+      <div class="nav-links" id="navLinks">
+        <a href="index.html">Home</a>
+        <a href="docs.html" style="color: var(--cyan);">Docs</a>
+        <button class="search-shortcut" id="searchBtn" aria-label="Search" onclick="document.getElementById('searchOverlay').classList.add('open');document.getElementById('searchInput').focus();">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <kbd id="searchKbdNav"></kbd>
+        </button>
+        <a href="https://github.com/cosmicstack-labs/mercury-agent" class="github-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" style="vertical-align:-2px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span class="github-btn-text">Star</span>
+          <span class="github-btn-count" id="ghStars"></span>
+        </a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+    </div>
+  </nav>
+
+  <div class="docs-layout" style="margin-top: 80px;">
+    <aside class="docs-sidebar">
+      <nav>
+        <div class="sidebar-heading">Getting Started</div>
+        <a href="#installation">Installation</a>
+        <a href="#upgrade">Upgrade</a>
+        <a href="#setup">First-Time Setup</a>
+        <a href="#starting">Starting Mercury</a>
+        <div class="sidebar-heading">CLI Commands</div>
+        <a href="#cli-commands">Full Command Reference</a>
+        <a href="#doctor">Doctor (Reconfigure)</a>
+        <a href="#in-chat">In-Chat Commands</a>
+        <div class="sidebar-heading">Daemon Mode</div>
+        <a href="#daemon">Background Mode</a>
+        <a href="#service">System Service</a>
+        <a href="#platform-guide">Platform Guide</a>
+        <div class="sidebar-heading">Integrations</div>
+        <a href="#github-companion">GitHub Companion</a>
+        <a href="#telegram">Telegram</a>
+        <div class="sidebar-heading">Reference</div>
+        <a href="#tools">Built-in Tools</a>
+        <a href="#configuration">Configuration</a>
+        <a href="#permissions">Permissions</a>
+        <a href="#second-brain">Second Brain</a>
+        <a href="#providers">Provider Fallback</a>
+        <a href="#scheduling">Scheduling</a>
+        <a href="#skills">Skills</a>
+      </nav>
+    </aside>
+
+    <main class="docs-content">
+
+      <h2 id="installation">Installation</h2>
+      <p>Mercury requires <strong>Node.js 20+</strong>. Install with npm:</p>
+      <div class="terminal-inline">
+        <code>npm i -g @cosmicstack/mercury-agent</code>
+      </div>
+      <p>Or run without installing:</p>
+      <div class="terminal-inline">
+        <code>npx @cosmicstack/mercury-agent</code>
+      </div>
+
+      <h2 id="upgrade">Upgrade</h2>
+      <p>Mercury includes a built-in upgrade command that handles the full update cycle:</p>
+      <div class="terminal-inline">
+        <code>mercury upgrade</code>
+      </div>
+      <p>This command:</p>
+      <ul>
+        <li><strong>Checks npm</strong> for the latest published version</li>
+        <li><strong>Stops the daemon</strong> if running, to avoid conflicts</li>
+        <li><strong>Removes the old package</strong> first to prevent <code>ENOTEMPTY</code> errors</li>
+        <li><strong>Installs</strong> the latest version globally</li>
+        <li><strong>Shows</strong> the before/after version comparison</li>
+      </ul>
+      <div class="callout">
+        <div class="callout-title">ENOTEMPTY fix</div>
+        <p>If you see <code>ENOTEMPTY: directory not empty, rename</code> when running <code>npm i -g</code> manually, use <code>mercury upgrade</code> instead — it removes the old package directory before installing the new one.</p>
+      </div>
+
+      <h2 id="setup">First-Time Setup</h2>
+      <p>Run <code>mercury</code> for the first time. The onboarding wizard asks for:</p>
+      <ul>
+        <li><strong>Your name</strong> — used by the agent to address you</li>
+        <li><strong>Agent name</strong> — defaults to "Mercury", customize it</li>
+        <li><strong>LLM providers</strong> — choose one or more: DeepSeek, OpenAI, Anthropic, Grok, Ollama Cloud, or Ollama Local</li>
+        <li><strong>Model selection</strong> — after each valid key, Mercury fetches recommended chat models and lets you choose a default</li>
+        <li><strong>Telegram bot token</strong> — optional, for remote access in private 1:1 chats</li>
+        <li><strong>LLM API keys</strong> — at least one: DeepSeek, OpenAI, Anthropic, Grok, or Ollama</li>
+        <li><strong>Telegram bot token</strong> — optional, for remote access</li>
+      </ul>
+      <p>Provider keys are validated by format and then by fetching available models. If model discovery fails, Mercury asks you to re-enter the key instead of accepting random text.</p>
+      <p>If you enable Telegram during first-time setup, Mercury starts a temporary pairing flow: send <code>/start</code> to your bot in Telegram, copy the pairing code you receive there, then paste that code into the CLI to finish setup.</p>
+      <p>All config is stored in <code>~/.mercury/</code> — nothing in your project directory.</p>
+
+      <div class="callout">
+        <div class="callout-title">Masked keys</div>
+        <p>When reconfiguring with <code>mercury doctor</code>, existing API keys are shown masked like
+          <code>sk-x••••4f2a</code>. Press Enter to keep the current value, or paste a new key to replace it.</p>
+      </div>
+
+      <h2 id="starting">Starting Mercury</h2>
+
+      <div class="callout" style="border-left-color: var(--cyan); background: rgba(0, 212, 255, 0.06);">
+        <div class="callout-title">Recommended: mercury up</div>
+        <p>The easiest way to run Mercury persistently. Installs the system service if needed, starts the daemon, and
+          ensures it's running.</p>
+      </div>
+      <div class="terminal-inline">
+        <code>mercury up</code>
+      </div>
+      <p>If Mercury is already running, <code>mercury up</code> just confirms it and shows the PID. If the service isn't
+        installed yet, it installs it first, then starts the daemon.</p>
+
+      <h3>Start (background daemon)</h3>
+      <div class="terminal-inline">
+        <code>mercury start</code>
+      </div>
+      <p>Starts Mercury as a background daemon by default. Telegram becomes your primary interface. Logs go to
+        <code>~/.mercury/daemon.log</code>. Stale PID files are auto-cleaned. Includes crash recovery with exponential
+        backoff.</p>
+
+      <h3>Foreground (interactive)</h3>
+      <div class="terminal-inline">
+        <code>mercury start --foreground</code>
+      </div>
+      <p>Runs in the foreground with a readline prompt. Press <code>Ctrl+C</code> to exit. All conversation happens in
+        your terminal with real-time text streaming and markdown rendering. Shorthand: <code>mercury start -f</code>.</p>
+      <p>When running in background mode, you can stop it with:</p>
+      <div class="terminal-inline">
+        <code>mercury stop</code>
+      </div>
+
+      <h3>Verbose logging</h3>
+      <p>Add <code>--verbose</code> to any start command to see debug logs on stderr:</p>
+      <div class="terminal-inline">
+        <code>mercury start --verbose</code>
+      </div>
+
+      <h2 id="cli-commands">Full Command Reference</h2>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>mercury up</td>
+            <td><strong>Recommended.</strong> Install service + start daemon + ensure running</td>
+          </tr>
+          <tr>
+            <td>mercury</td>
+            <td>Start the agent (same as <code>mercury start</code>)</td>
+          </tr>
+          <tr>
+            <td>mercury start</td>
+            <td>Start as background daemon (default)</td>
+          </tr>
+          <tr>
+            <td>mercury start --foreground</td>
+            <td>Start in foreground (interactive) mode. Shorthand: <code>-f</code></td>
+          </tr>
+          <tr>
+            <td>mercury restart</td>
+            <td>Restart a background Mercury process</td>
+          </tr>
+          <tr>
+            <td>mercury stop</td>
+            <td>Stop a background Mercury process</td>
+          </tr>
+          <tr>
+            <td>mercury logs</td>
+            <td>Show last 100 lines of daemon logs</td>
+          </tr>
+          <tr>
+            <td>mercury status</td>
+            <td>Show config, providers, daemon PID, and budget</td>
+          </tr>
+          <tr>
+            <td>mercury doctor</td>
+            <td>Reconfigure settings — press Enter to keep current values</td>
+          </tr>
+          <tr>
+            <td>mercury setup</td>
+            <td>Re-run the setup wizard (same as doctor)</td>
+          </tr>
+          <tr>
+            <td>mercury help</td>
+            <td>Show the full manual (tools, commands, config paths)</td>
+          </tr>
+          <tr>
+            <td>mercury service install</td>
+            <td>Install as system service (auto-start on boot)</td>
+          </tr>
+          <tr>
+            <td>mercury service uninstall</td>
+            <td>Uninstall the system service</td>
+          </tr>
+          <tr>
+            <td>mercury service status</td>
+            <td>Show system service status</td>
+          </tr>
+          <tr>
+            <td>mercury --verbose</td>
+            <td>Start with debug logging on stderr</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="doctor">Doctor (Reconfigure)</h2>
+      <p><code>mercury doctor</code> re-runs the setup wizard with your current values pre-filled. Press <strong>Enter</strong>
+        on any field to keep it unchanged, or type a new value to replace it.</p>
+      <ul>
+        <li><strong>API keys</strong> are shown masked: <code>sk-x••••4f2a</code></li>
+        <li><strong>Providers and models</strong> can be reselected; Mercury fetches models again for changed credentials</li>
+        <li><strong>Telegram token</strong> — type <code>none</code> to disable Telegram, or paste a token to start the pairing-code flow</li>
+        <li><strong>Daily budget</strong> — change the token budget limit</li>
+      </ul>
+      <div class="terminal-inline">
+        <code>mercury doctor</code>
+      </div>
+
+      <h2 id="in-chat">In-Chat Commands</h2>
+      <p>Type these during a conversation with Mercury. Most work in both CLI and Telegram unless marked otherwise. They <strong>do not consume
+          API tokens</strong>.</p>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>/help</td>
+            <td>Show the full manual</td>
+          </tr>
+          <tr>
+            <td>/status</td>
+            <td>Show agent name, provider, budget, and channels</td>
+          </tr>
+          <tr>
+            <td>/ or /menu</td>
+            <td>CLI only: open the arrow-key command picker with Back and Exit options</td>
+          </tr>
+          <tr>
+            <td>/telegram</td>
+            <td>CLI only: open Telegram management with pending requests, approvals, roles, and reset actions</td>
+          </tr>
+          <tr>
+            <td>/telegram pending</td>
+            <td>CLI only: list pending Telegram access requests</td>
+          </tr>
+          <tr>
+            <td>/telegram users</td>
+            <td>CLI only: list approved Telegram admins and members</td>
+          </tr>
+          <tr>
+            <td>/telegram approve &lt;code|id&gt;</td>
+            <td>CLI only: approve the first pairing code or a later Telegram access request</td>
+          </tr>
+          <tr>
+            <td>/telegram reject &lt;id&gt;</td>
+            <td>CLI only: reject a pending Telegram access request</td>
+          </tr>
+          <tr>
+            <td>/telegram remove &lt;id&gt;</td>
+            <td>CLI only: revoke an approved Telegram user</td>
+          </tr>
+          <tr>
+            <td>/telegram promote &lt;id&gt;</td>
+            <td>CLI only: promote a Telegram member to admin</td>
+          </tr>
+          <tr>
+            <td>/telegram demote &lt;id&gt;</td>
+            <td>CLI only: demote a Telegram admin to member</td>
+          </tr>
+          <tr>
+            <td>/telegram reset</td>
+            <td>CLI only: clear all Telegram access and restart pairing from scratch</td>
+          </tr>
+          <tr>
+            <td>/tools</td>
+            <td>List all currently loaded tools</td>
+          </tr>
+          <tr>
+            <td>/skills</td>
+            <td>List installed skills</td>
+          </tr>
+          <tr>
+            <td>/stream</td>
+            <td>Toggle Telegram text streaming (on/off)</td>
+          </tr>
+          <tr>
+            <td>/stream off</td>
+            <td>Disable streaming — responses arrive as single message</td>
+          </tr>
+          <tr>
+            <td>/budget</td>
+            <td>Show token budget status</td>
+          </tr>
+          <tr>
+            <td>/budget override</td>
+            <td>Override budget for one request</td>
+          </tr>
+          <tr>
+            <td>/budget reset</td>
+            <td>Reset usage to zero</td>
+          </tr>
+          <tr>
+            <td>/budget set &lt;n&gt;</td>
+            <td>Change daily token budget</td>
+          </tr>
+          <tr>
+            <td>/permissions</td>
+            <td>Change permission mode (Ask Me / Allow All) — Telegram only</td>
+          </tr>
+          <tr>
+            <td>/tasks</td>
+            <td>List scheduled tasks</td>
+          </tr>
+          <tr>
+            <td>/memory</td>
+            <td>View and manage second brain memory</td>
+          </tr>
+          <tr>
+            <td>/unpair</td>
+            <td>Telegram only: reset all access, new users can /start again</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <div class="callout-title">Telegram pairing and access</div>
+        <p>Telegram stays private 1:1 only. The first user sends <code>/start</code>, receives a pairing code in Telegram, and you approve that code from the CLI during setup. Later Telegram users also send <code>/start</code>, appear as pending requests, and can then be approved or rejected from the CLI <code>/telegram</code> menu.</p>
+      </div>
+
+      <h2 id="daemon">Daemon Mode</h2>
+      <p>Mercury runs as a background daemon by default. Telegram and scheduled tasks keep working after you close the
+        terminal.</p>
+
+      <h3>Start</h3>
+      <div class="terminal-inline">
+        <code>mercury start</code>
+      </div>
+      <p>Starts Mercury as a background daemon by default. Spawns a detached child process, writes a PID file to
+        <code>~/.mercury/daemon.pid</code>, and redirects output to <code>~/.mercury/daemon.log</code>. Stale PID files
+        are automatically cleaned up.</p>
+
+      <h3>Start in foreground</h3>
+      <div class="terminal-inline">
+        <code>mercury start --foreground</code>
+      </div>
+      <p>Runs Mercury attached to your terminal. Useful for debugging or when you want to see output directly. Shorthand:
+        <code>mercury start -f</code>.</p>
+
+      <h3>The easy way: mercury up</h3>
+      <div class="terminal-inline">
+        <code>mercury up</code>
+      </div>
+      <p>This one command does everything: installs the system service if needed, starts the background daemon, and
+        confirms Mercury is running. If it's already running, it just shows you the PID.</p>
+
+      <h3>Stop</h3>
+      <div class="terminal-inline">
+        <code>mercury stop</code>
+      </div>
+      <p>Sends <code>SIGTERM</code> (<code>process.kill</code> on Windows) to the background process and removes the PID
+        file.</p>
+
+      <h3>Restart</h3>
+      <div class="terminal-inline">
+        <code>mercury restart</code>
+      </div>
+      <p>Stops the running daemon (if any) and starts a fresh one. Useful when something isn't working right and you need a
+        clean restart.</p>
+
+      <h3>View logs</h3>
+      <div class="terminal-inline">
+        <code>mercury logs</code>
+      </div>
+      <p>Shows the last 100 lines of <code>~/.mercury/daemon.log</code>.</p>
+
+      <h3>Check status</h3>
+      <div class="terminal-inline">
+        <code>mercury status</code>
+      </div>
+      <p>Shows whether the daemon is running, its PID, and the log file path.</p>
+
+      <div class="callout">
+        <div class="callout-title">Crash recovery</div>
+        <p>Background mode includes a watchdog. If Mercury crashes, it restarts automatically with exponential backoff
+          (1s, 1.25s, 1.56s...). After 10 crashes within 60 seconds, it exits to prevent crash loops. Stale PID files
+          are auto-cleaned on startup to prevent "already running" false positives.</p>
+      </div>
+
+      <h2 id="service">System Service (Auto-Start on Boot)</h2>
+      <p>Install Mercury as a system service so it starts automatically on boot and restarts on crash.</p>
+      <div class="terminal-inline">
+        <code>mercury service install</code>
+      </div>
+      <p>This detects your platform and generates the appropriate service config.</p>
+
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Platform</th>
+            <th>Method</th>
+            <th>Requires Admin</th>
+            <th>Auto-Start</th>
+            <th>Crash Recovery</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>macOS</td>
+            <td>LaunchAgent plist</td>
+            <td>No</td>
+            <td>On login</td>
+            <td>KeepAlive (restart on crash)</td>
+          </tr>
+          <tr>
+            <td>Linux</td>
+            <td>systemd user unit</td>
+            <td>No*</td>
+            <td>On login</td>
+            <td>Restart=on-failure, 5s delay</td>
+          </tr>
+          <tr>
+            <td>Windows</td>
+            <td>Task Scheduler (schtasks)</td>
+            <td>No</td>
+            <td>On logon</td>
+            <td>Built-in watchdog</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p><em>*Linux boot-without-login requires <code>loginctl enable-linger $USER</code> (one-time, needs sudo).</em>
+      </p>
+
+      <h3>Other service commands</h3>
+      <div class="terminal-inline">
+        <code>mercury service status</code>
+      </div>
+      <div class="terminal-inline">
+        <code>mercury service uninstall</code>
+      </div>
+
+      <h2 id="platform-guide">Platform-Specific Guide</h2>
+
+      <div class="platform-tabs">
+        <button class="platform-tab active"
+          onclick="showPlatform('macos', this)">macOS</button>
+        <button class="platform-tab"
+          onclick="showPlatform('linux', this)">Linux</button>
+        <button class="platform-tab"
+          onclick="showPlatform('windows', this)">Windows</button>
+      </div>
+
+      <div id="platform-macos" class="platform-content active">
+        <p><code>mercury service install</code> creates a LaunchAgent at
+          <code>~/Library/LaunchAgents/com.cosmicstack.mercury.plist</code>.</p>
+        <ul>
+          <li><strong>Auto-start</strong>: Loads on login via <code>launchctl load</code></li>
+          <li><strong>Crash recovery</strong>: <code>KeepAlive SuccessfulExit = false</code> restarts on crash</li>
+          <li><strong>No sudo needed</strong>: User-level LaunchAgent, not system daemon</li>
+          <li><strong>Logs</strong>: <code>~/.mercury/daemon.log</code> and <code>~/.mercury/daemon-error.log</code></li>
+        </ul>
+        <h3>Manual management</h3>
+        <div class="terminal-inline">
+          <code>launchctl load ~/Library/LaunchAgents/com.cosmicstack.mercury.plist</code>
+        </div>
+        <div class="terminal-inline">
+          <code>launchctl unload ~/Library/LaunchAgents/com.cosmicstack.mercury.plist</code>
+        </div>
+      </div>
+
+      <div id="platform-linux" class="platform-content">
+        <p><code>mercury service install</code> creates a systemd user unit at
+          <code>~/.config/systemd/user/mercury.service</code>.</p>
+        <ul>
+          <li><strong>Auto-start</strong>: Enabled via <code>systemctl --user enable mercury.service</code></li>
+          <li><strong>Crash recovery</strong>: <code>Restart=on-failure</code> with 5s delay</li>
+          <li><strong>No sudo needed</strong>: User-level service</li>
+          <li><strong>Boot without login</strong>: Run <code>sudo loginctl enable-linger $USER</code> once</li>
+          <li><strong>Logs</strong>: <code>~/.mercury/daemon.log</code> or <code>journalctl --user -u mercury</code></li>
+        </ul>
+        <h3>Manual management</h3>
+        <div class="terminal-inline">
+          <code>systemctl --user start mercury</code>
+        </div>
+        <div class="terminal-inline">
+          <code>systemctl --user status mercury</code>
+        </div>
+        <div class="terminal-inline">
+          <code>systemctl --user stop mercury</code>
+        </div>
+      </div>
+
+      <div id="platform-windows" class="platform-content">
+        <p><code>mercury service install</code> creates a Windows Task Scheduler task named <code>MercuryAgent</code>.
+        </p>
+        <ul>
+          <li><strong>Auto-start</strong>: Triggers on user logon via <code>schtasks</code></li>
+          <li><strong>Crash recovery</strong>: Built-in watchdog with exponential backoff</li>
+          <li><strong>No admin needed</strong>: Runs with limited privileges (<code>/rl limited</code>)</li>
+          <li><strong>Logs</strong>: <code>%USERPROFILE%\.mercury\daemon.log</code></li>
+        </ul>
+        <h3>Manual management</h3>
+        <div class="terminal-inline">
+          <code>schtasks /query /tn "MercuryAgent" /fo list</code>
+        </div>
+        <div class="terminal-inline">
+          <code>schtasks /run /tn "MercuryAgent"</code>
+        </div>
+        <div class="terminal-inline">
+          <code>schtasks /delete /tn "MercuryAgent" /f</code>
+        </div>
+      </div>
+
+      <h2 id="github-companion">GitHub Companion</h2>
+      <p>Mercury can act as your GitHub companion — creating pull requests, reviewing PRs, managing issues, and making
+        co-authored commits — all through natural conversation. When configured, five GitHub tools are registered
+        alongside Mercury's built-in toolset, letting you manage repositories without leaving the terminal or Telegram.</p>
+
+      <div class="callout">
+        <div class="callout-title">Conditional availability</div>
+        <p>GitHub tools <strong>only appear when <code>GITHUB_TOKEN</code> is configured</strong> via
+          <code>mercury doctor</code>. Without a token, these tools are not registered and won't be available in
+          conversation.</p>
+      </div>
+
+      <h3>Why set up GitHub?</h3>
+      <ul>
+        <li><strong>Co-authored commits</strong> — Mercury's avatar appears alongside yours on every commit it helps with</li>
+        <li><strong>Pull requests</strong> — "Create a PR for this change" and Mercury stages, commits, pushes, and opens the PR</li>
+        <li><strong>Issue management</strong> — "Check open issues" or "File a bug for the login crash"</li>
+        <li><strong>Code review</strong> — "Review PR #5" and Mercury reads the diff and posts a summary</li>
+        <li><strong>Full API access</strong> — The <code>github_api</code> tool lets Mercury hit any GitHub endpoint</li>
+      </ul>
+
+      <h3>Setup</h3>
+      <p>Run <code>mercury doctor</code> and fill in the four GitHub fields:</p>
+      <div class="terminal-inline">
+        <code>mercury doctor</code>
+      </div>
+
+      <h4>1. GitHub username</h4>
+      <p>Your GitHub username. This is used for commit attribution and identifying you in API calls.</p>
+      <div class="terminal-inline">
+        <code>Example: hotheadhacker</code>
+      </div>
+
+      <h4>2. Co-authored-by (automatic)</h4>
+      <p>Every Mercury-assisted commit automatically includes a <code>Co-authored-by: Mercury &lt;mercury@cosmicstack.org&gt;</code>
+        trailer. No configuration needed — this is the default. Mercury's avatar will appear alongside yours on GitHub.</p>
+      <p>You can customize the email in <code>~/.mercury/.env</code> by setting <code>GITHUB_EMAIL</code> if you prefer a
+        different co-author address.</p>
+
+      <h4>2. GitHub PAT (Personal Access Token)</h4>
+      <p>You need a token so Mercury can authenticate with the GitHub API. <strong>Never share this token.</strong> It's
+        stored locally in <code>~/.mercury/.env</code> and never sent anywhere except GitHub's API.</p>
+
+      <div class="callout callout-warn">
+        <div class="callout-title">Where to create your token</div>
+        <p><strong>Fine-grained PAT (recommended):</strong></p>
+        <ol>
+          <li>Go to <a href="https://github.com/settings/personal-access-tokens/new" target="_blank"
+              rel="noopener">github.com/settings/personal-access-tokens/new</a></li>
+          <li>Give it a name (e.g. <code>mercury-agent</code>) and set an expiration</li>
+          <li>Under <strong>Repository access</strong>, select <strong>All repositories</strong> or choose specific
+            repos</li>
+          <li>Under <strong>Permissions → Repository permissions</strong>, grant:
+            <ul>
+              <li><strong>Contents</strong> — Read and write</li>
+              <li><strong>Pull requests</strong> — Read and write</li>
+              <li><strong>Issues</strong> — Read and write</li>
+            </ul>
+          </li>
+          <li>Click <strong>Generate token</strong> and copy it immediately</li>
+        </ol>
+        <p><strong>Classic PAT:</strong></p>
+        <ol>
+          <li>Go to <a href="https://github.com/settings/tokens/new" target="_blank"
+              rel="noopener">github.com/settings/tokens/new</a></li>
+          <li>Give it a name (e.g. <code>mercury-agent</code>) and set an expiration</li>
+          <li>Select the <strong>repo</strong> scope (full control of private repositories)</li>
+          <li>Click <strong>Generate token</strong> and copy it immediately</li>
+        </ol>
+      </div>
+
+      <h4>3. Default repo (optional)</h4>
+      <p>Set a default repository so you can say <code>"create an issue"</code> without specifying the repo every time.
+        You can enter it in any of these formats:</p>
+      <div class="terminal-inline">
+        <code>hotheadhacker/mercury-agent</code>
+      </div>
+      <div class="terminal-inline">
+        <code>https://github.com/hotheadhacker/mercury-agent</code>
+      </div>
+      <p>Mercury will parse the owner and repo name automatically from either format.</p>
+
+      <p>Press <strong>Enter</strong> on any field to keep its current value. When the PAT is set, you'll see:</p>
+      <div class="terminal-inline">
+        <code>✓ GitHub tools registered (5)</code>
+      </div>
+
+      <h3>GitHub Tools</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What it does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>create_pr</td>
+            <td>Create a pull request with title, body, head branch, and base branch</td>
+          </tr>
+          <tr>
+            <td>review_pr</td>
+            <td>Fetch a PR diff, review the changes, and post review comments</td>
+          </tr>
+          <tr>
+            <td>list_issues</td>
+            <td>List and filter issues in a repository (open, closed, by label, by assignee)</td>
+          </tr>
+          <tr>
+            <td>create_issue</td>
+            <td>Create a new issue with title, body, labels, and assignees</td>
+          </tr>
+          <tr>
+            <td>github_api</td>
+            <td>Raw GitHub API access — an escape hatch for any endpoint not covered above</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Co-Authored Commits</h3>
+      <p>When Mercury commits code using <code>git_commit</code>, it automatically appends a
+        <code>Co-authored-by: Mercury &lt;mercury@cosmicstack.org&gt;</code> trailer. This means Mercury's avatar
+        appears alongside yours in GitHub's commit history — giving credit where it's due.</p>
+
+      <h3>Example: Create a PR</h3>
+      <div class="terminal-window" style="max-width: 680px; margin: 20px 0;">
+        <div class="terminal-bar">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">mercury</span>
+        </div>
+        <div class="terminal-body" style="min-height: auto; padding: 16px 24px;">
+          <p style="margin:0;color:var(--gray);">You: <span style="color:var(--white);">create a PR for this change</span></p>
+          <p style="margin:0;color:var(--gray-dim); font-style:italic;">  [Using: git_status, git_diff, git_log]</p>
+          <p style="margin:0;color:var(--gray-dim); font-style:italic;">  [Using: create_pr]</p>
+          <p style="margin:0;color:var(--green);">  PR #42 created: "Add GitHub Companion docs section"</p>
+          <p style="margin:0;color:var(--cyan);">Mercury:</p>
+          <p style="margin:0;color:var(--white);">  Done! I've created PR #42 — "Add GitHub Companion docs section"</p>
+          <p style="margin:0;color:var(--gray);">  targeting <code>main</code> from <code>feature/github-companion-docs</code>.</p>
+          <p style="margin:0;color:var(--gray);">  The PR includes the new section, sidebar link, and nav button update.</p>
+        </div>
+      </div>
+
+      <h3>Security</h3>
+      <div class="callout" style="border-left-color: var(--yellow);">
+        <div class="callout-title" style="color: var(--yellow);">PAT storage</div>
+        <p>Your GitHub PAT is stored in <code>~/.mercury/mercury.yaml</code> alongside your other configuration. It is
+          never sent to any external service — only to the GitHub API directly from your machine. Treat this file like
+          any other credential: don't commit it, don't share it, and rotate the token if you suspect it's compromised.</p>
+      </div>
+
+      <h2 id="telegram">Telegram</h2>
+      <p>Mercury connects to Telegram via a bot token, providing a mobile-first interface with streaming, file uploads,
+        and inline approval keyboards.</p>
+
+      <h3>Access Model</h3>
+      <p>Mercury uses an <strong>organization access model</strong> with admins and members. The first user becomes the
+        admin by completing a pairing-code flow during setup. Additional users request access by sending
+        <code>/start</code>, which admins can approve or reject.</p>
+
+      <div class="callout" style="border-left-color: var(--cyan); background: rgba(0, 212, 255, 0.06);">
+        <div class="callout-title">First-time pairing</div>
+        <p>When no admins exist yet, sending <code>/start</code> creates a <strong>pairing code</strong> that must be entered in the CLI to complete setup. This ensures only the legitimate owner can gain initial access. Once an admin exists, new users send
+          <code>/start</code> to create a pending request that admins can approve or reject.</p>
+      </div>
+
+      <div class="callout callout-warn">
+        <div class="callout-title">Private chats only</div>
+        <p>Mercury only works in private (one-to-one) chats. Messages in groups or channels are always ignored.</p>
+      </div>
+
+      <h4>Roles</h4>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Description</th>
+            <th>Can approve requests?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Admin</strong></td>
+            <td>First user to pair. Can approve/reject access requests, promote/demote users, and reset all access.</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td><strong>Member</strong></td>
+            <td>Approved by an admin. Can send messages and receive responses.</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>Pending</strong></td>
+            <td>Sent <code>/start</code> but not yet approved. Can only see their pending status.</td>
+            <td>No</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>CLI Commands</h4>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>mercury telegram list</code></td>
+            <td>Show approved admins, members, and pending requests</td>
+          </tr>
+          <tr>
+            <td><code>mercury telegram approve &lt;code|userId&gt;</code></td>
+            <td>Approve the first pairing code or a pending request by user ID</td>
+          </tr>
+          <tr>
+            <td><code>mercury telegram reject &lt;userId&gt;</code></td>
+            <td>Reject a pending access request</td>
+          </tr>
+          <tr>
+            <td><code>mercury telegram remove &lt;userId&gt;</code></td>
+            <td>Remove an approved admin or member</td>
+          </tr>
+          <tr>
+            <td><code>mercury telegram promote &lt;userId&gt;</code></td>
+            <td>Promote a member to admin</td>
+          </tr>
+          <tr>
+            <td><code>mercury telegram demote &lt;userId&gt;</code></td>
+            <td>Demote an admin to member (at least one admin must remain)</td>
+          </tr>
+          <tr>
+            <td><code>mercury telegram reset</code></td>
+            <td>Clear all Telegram access (admins, members, pending). Start fresh.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>In-Chat Commands</h4>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Command</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>/start</code> or <code>/pair</code></td>
+            <td>Request access (new users) or check status (approved users)</td>
+          </tr>
+          <tr>
+            <td><code>/unpair</code></td>
+            <td>Admin only: Reset all Telegram access for this Mercury instance</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Features</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Text streaming</td>
+            <td>Real-time response editing with typing indicators (toggle with <code>/stream</code>)</td>
+          </tr>
+          <tr>
+            <td>File uploads</td>
+            <td>Photos, audio, video, and documents auto-detected and sent with the right API</td>
+          </tr>
+          <tr>
+            <td>HTML formatting</td>
+            <td>Markdown automatically converted to Telegram-compatible HTML</td>
+          </tr>
+          <tr>
+            <td>Inline keyboards</td>
+            <td>Shell command and scope approvals shown as Allow / Always / Deny buttons</td>
+          </tr>
+          <tr>
+            <td>Multi-user access</td>
+            <td>Organization model with admins and members. <code>send_message</code> broadcasts to all approved users.</td>
+          </tr>
+          <tr>
+            <td>Bot commands menu</td>
+            <td>12 commands registered in Telegram's bot menu for quick access</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Configuration</h3>
+      <p>Telegram is set up during <code>mercury doctor</code> or initial onboarding. You need a bot token from
+        <a href="https://t.me/BotFather" target="_blank" rel="noopener">@BotFather</a>.</p>
+
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Variable</th>
+            <th>Description</th>
+            <th>Default</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>TELEGRAM_BOT_TOKEN</td>
+            <td>Bot token from @BotFather</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <td>TELEGRAM_ENABLED</td>
+            <td>Enable/disable Telegram channel</td>
+            <td>false</td>
+          </tr>
+          <tr>
+            <td>TELEGRAM_STREAMING</td>
+            <td>Enable real-time text streaming</td>
+            <td>true</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Type <code>none</code> as the bot token during <code>mercury doctor</code> to disable Telegram.</p>
+
+      <h2 id="tools">Built-in Tools</h2>
+      <p>Mercury has a built-in toolset it can use during conversations. These are not CLI commands — the agent decides
+        when to call them.</p>
+
+      <h3>Filesystem</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What it does</th>
+            <th>Parameters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>read_file</td>
+            <td>Read file contents</td>
+            <td>path</td>
+          </tr>
+          <tr>
+            <td>write_file</td>
+            <td>Write to an existing file</td>
+            <td>path, content</td>
+          </tr>
+          <tr>
+            <td>create_file</td>
+            <td>Create a new file (creates parent dirs)</td>
+            <td>path, content</td>
+          </tr>
+          <tr>
+            <td>edit_file</td>
+            <td>Search and replace text in a file</td>
+            <td>path, old_string, new_string</td>
+          </tr>
+          <tr>
+            <td>list_dir</td>
+            <td>List directory contents</td>
+            <td>path</td>
+          </tr>
+          <tr>
+            <td>delete_file</td>
+            <td>Delete a file</td>
+            <td>path</td>
+          </tr>
+          <tr>
+            <td>send_file</td>
+            <td>Send file to user (Telegram upload)</td>
+            <td>path</td>
+          </tr>
+          <tr>
+            <td>approve_scope</td>
+            <td>Request read/write access to a directory</td>
+            <td>path, mode</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Messaging</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What it does</th>
+            <th>Parameters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>send_message</td>
+            <td>Send a message to approved Telegram recipients</td>
+            <td>content</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Shell</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What it does</th>
+            <th>Parameters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>run_command</td>
+            <td>Execute a shell command</td>
+            <td>command</td>
+          </tr>
+          <tr>
+            <td>cd</td>
+            <td>Change working directory (persists across calls)</td>
+            <td>path</td>
+          </tr>
+          <tr>
+            <td>approve_command</td>
+            <td>Permanently approve a command type</td>
+            <td>command (e.g. "curl")</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Git</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What it does</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>git_status</td>
+            <td>Working tree status</td>
+          </tr>
+          <tr>
+            <td>git_diff</td>
+            <td>Show file changes</td>
+          </tr>
+          <tr>
+            <td>git_log</td>
+            <td>Commit history</td>
+          </tr>
+          <tr>
+            <td>git_add</td>
+            <td>Stage files</td>
+          </tr>
+          <tr>
+            <td>git_commit</td>
+            <td>Create a commit</td>
+          </tr>
+          <tr>
+            <td>git_push</td>
+            <td>Push to remote (needs approval)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Web, Skills, Scheduler, System</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>What it does</th>
+            <th>Category</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>fetch_url</td>
+            <td>Fetch a URL and return content (HTML stripped)</td>
+            <td>Web</td>
+          </tr>
+          <tr>
+            <td>install_skill</td>
+            <td>Install a skill from URL or content</td>
+            <td>Skills</td>
+          </tr>
+          <tr>
+            <td>list_skills</td>
+            <td>List installed skills</td>
+            <td>Skills</td>
+          </tr>
+          <tr>
+            <td>use_skill</td>
+            <td>Invoke a skill by name</td>
+            <td>Skills</td>
+          </tr>
+          <tr>
+            <td>schedule_task</td>
+            <td>Schedule recurring (cron) or one-shot (delay) task</td>
+            <td>Scheduler</td>
+          </tr>
+          <tr>
+            <td>list_scheduled_tasks</td>
+            <td>View all scheduled tasks</td>
+            <td>Scheduler</td>
+          </tr>
+          <tr>
+            <td>cancel_scheduled_task</td>
+            <td>Cancel a scheduled task</td>
+            <td>Scheduler</td>
+          </tr>
+          <tr>
+            <td>budget_status</td>
+            <td>Check token budget usage</td>
+            <td>System</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="configuration">Configuration</h2>
+      <p>All runtime data lives in <code>~/.mercury/</code> — not in your project directory.</p>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Path</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>~/.mercury/mercury.yaml</td>
+            <td>Main config (providers, channels, budget)</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/soul/*.md</td>
+            <td>Agent personality (soul, persona, taste, heartbeat)</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/permissions.yaml</td>
+            <td>Capabilities and approval rules</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/skills/</td>
+            <td>Installed skills</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/schedules.yaml</td>
+            <td>Scheduled tasks</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/token-usage.json</td>
+            <td>Daily token usage tracking</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/memory/</td>
+            <td>Short-term, long-term, episodic memory</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/daemon.pid</td>
+            <td>Background process PID</td>
+          </tr>
+          <tr>
+            <td>~/.mercury/daemon.log</td>
+            <td>Daemon mode logs</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="permissions">Permissions</h2>
+      <p>Mercury has a three-tier permission system for shell commands:</p>
+      <ol>
+        <li><strong>Blocked</strong> — Commands like <code>sudo</code>, <code>rm -rf /</code>, <code>mkfs</code> are
+          never executed</li>
+        <li><strong>Auto-approved</strong> — Safe commands like <code>ls</code>, <code>cat</code>, <code>git status</code>
+          run without asking</li>
+        <li><strong>Pending approval</strong> — Unknown commands pause and ask you. Say <strong>"always"</strong> to
+          permanently approve a command type</li>
+      </ol>
+      <p>Edit <code>~/.mercury/permissions.yaml</code> to customize. Skill elevation: skills with <code>allowed-tools
+      </code> in their SKILL.md get automatic approval for those tools during execution.</p>
+
+      <h3>Permission Modes</h3>
+      <p>At session start, Mercury asks you to choose a permission mode:</p>
+      <ul>
+        <li><strong>🔒 Ask Me</strong> — Mercury asks for confirmation before file writes, shell commands that need approval, and scope changes. Default on both CLI and Telegram.</li>
+        <li><strong>✅ Allow All</strong> — Mercury auto-approves all directory scopes, all shell commands (except blocked), and loop-continuation prompts. No interruptions during the session. Resets on restart.</li>
+      </ul>
+      <p>On <strong>CLI</strong>: an arrow-key menu appears at startup before the first prompt.</p>
+      <p>On <strong>Telegram</strong>: inline keyboard buttons appear with the first message. Use <code>/permissions</code> to change mode at any time.</p>
+      <p><strong>Scheduled tasks</strong> always run in Allow All mode — filesystem access and shell commands are auto-approved. You receive a notification before each task executes.</p>
+
+      <h2 id="second-brain">Second Brain</h2>
+      <p>Mercury has a persistent, structured memory that grows with every conversation. When enabled, it automatically extracts, stores, and retrieves facts about you — your preferences, goals, projects, habits, and more.</p>
+
+      <h3>How it works</h3>
+      <ol>
+        <li><strong>Extraction</strong> — After each conversation, Mercury pulls 0&ndash;3 facts and stores them with type, confidence, importance, and durability scores.</li>
+        <li><strong>Retrieval</strong> — Before each message, the top 5 relevant memories (within a 900-char budget) are injected into context. Mercury references them naturally.</li>
+        <li><strong>Consolidation</strong> — Every 60 minutes, Mercury builds a profile summary, an active-state summary, and generates <code>reflection</code> memories from detected patterns.</li>
+        <li><strong>Pruning</strong> — Active-scope memories stale after 21 days. Inferred memories decay. Low-confidence durable memories are dismissed after 120 days. Memories reinforced 3+ times are promoted to durable.</li>
+      </ol>
+
+      <h3>Memory Types</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr><th>Type</th><th>Scope</th><th>What it stores</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>identity</td><td>durable</td><td>Who you are — name, role, background</td></tr>
+          <tr><td>preference</td><td>durable</td><td>What you like and dislike</td></tr>
+          <tr><td>goal</td><td>active</td><td>What you're working toward</td></tr>
+          <tr><td>project</td><td>active</td><td>What you're building</td></tr>
+          <tr><td>habit</td><td>durable</td><td>Behavioral patterns and routines</td></tr>
+          <tr><td>decision</td><td>active</td><td>Decisions and choices you've made</td></tr>
+          <tr><td>constraint</td><td>durable</td><td>Rules and constraints you follow</td></tr>
+          <tr><td>relationship</td><td>durable</td><td>People and connections</td></tr>
+          <tr><td>episode</td><td>active</td><td>Specific events and experiences</td></tr>
+          <tr><td>reflection</td><td>durable</td><td>System-generated insights from patterns</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Conflict Resolution</h3>
+      <p>When Mercury detects opposing memories (e.g. "prefers TypeScript" vs "prefers Python"), the higher-confidence one wins. If equal, the newer one wins. Negation mismatches ("likes X" vs "does not like X") are detected and resolved automatically.</p>
+
+      <h3>Evidence Kinds</h3>
+      <ul>
+        <li><strong>direct</strong> — Explicitly stated by you (highest confidence)</li>
+        <li><strong>inferred</strong> — Pattern Mercury detected (decays over time)</li>
+        <li><strong>manual</strong> — Added via <code>/memory</code> command</li>
+        <li><strong>system</strong> — Auto-generated reflections from consolidation</li>
+      </ul>
+
+      <h3>Managing Memory</h3>
+      <p>Use <code>/memory</code> in any channel:</p>
+      <table class="cmd-table">
+        <thead>
+          <tr><th>Action</th><th>CLI</th><th>Telegram</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Overview</td><td>Arrow-key menu → Overview</td><td>Inline button: 📋 Overview</td></tr>
+          <tr><td>Recent memories</td><td>Arrow-key menu → Recent</td><td>Inline button: 🔍 Recent</td></tr>
+          <tr><td>Search</td><td>Arrow-key menu → Search</td><td>Not available (ask Mercury to search)</td></tr>
+          <tr><td>Pause learning</td><td>Arrow-key menu → Pause</td><td>Inline button: ⏸ Pause</td></tr>
+          <tr><td>Resume learning</td><td>Arrow-key menu → Resume</td><td>Inline button: ▶ Resume</td></tr>
+          <tr><td>Clear all</td><td>Arrow-key menu → Clear (with confirmation)</td><td>Inline button: 🗑 Clear → Yes</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Enable / Disable</h3>
+      <p>Second Brain is <strong>enabled by default</strong>. To disable it:</p>
+      <ul>
+        <li>Environment variable: <code>SECOND_BRAIN_ENABLED=false</code></li>
+        <li>Config file: set <code>memory.secondBrain.enabled: false</code> in <code>~/.mercury/mercury.yaml</code></li>
+      </ul>
+      <p>When disabled, Mercury falls back to basic long-term fact search (JSONL, text-match only). No extraction, no consolidation, no SQLite.</p>
+      <p>All data is stored locally in <code>~/.mercury/memory/second-brain/second-brain.db</code> (SQLite). Nothing leaves your machine.</p>
+
+      <h2 id="providers">Provider Fallback</h2>
+      <p>Configure multiple LLM providers. Mercury tries them in order and falls back automatically. When a provider
+        fails, Mercury tries the next one and remembers the last successful provider.</p>
+
+      <h3>Supported Providers</h3>
+      <table class="cmd-table">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Default Model</th>
+            <th>API Key</th>
+            <th>Configuration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>DeepSeek</strong></td>
+            <td>deepseek-chat</td>
+            <td>DEEPSEEK_API_KEY</td>
+            <td>Default provider, cost-effective</td>
+          </tr>
+          <tr>
+            <td><strong>OpenAI</strong></td>
+            <td>gpt-4o-mini</td>
+            <td>OPENAI_API_KEY</td>
+            <td>GPT-4o-mini, GPT-4o, o3, etc.</td>
+          </tr>
+          <tr>
+            <td><strong>Anthropic</strong></td>
+            <td>claude-sonnet-4-20250514</td>
+            <td>ANTHROPIC_API_KEY</td>
+            <td>Claude Sonnet, Haiku, Opus</td>
+          </tr>
+          <tr>
+            <td><strong>Grok (xAI)</strong></td>
+            <td>grok-4</td>
+            <td>GROK_API_KEY</td>
+            <td>OpenAI-compatible endpoint</td>
+          </tr>
+          <tr>
+            <td><strong>Ollama Cloud</strong></td>
+            <td>gpt-oss:120b</td>
+            <td>OLLAMA_CLOUD_API_KEY</td>
+            <td>Remote Ollama models via API</td>
+          </tr>
+          <tr>
+            <td><strong>Ollama Local</strong></td>
+            <td>gpt-oss:20b</td>
+            <td>No key needed</td>
+            <td>Local Ollama instance (127.0.0.1:11434)</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Configuring Providers</h3>
+      <p>Run <code>mercury doctor</code> and enter API keys for the providers you want to use. You can also set
+        environment variables directly or edit <code>~/.mercury/mercury.yaml</code>.</p>
+
+      <div class="callout">
+        <div class="callout-title">Environment variables</div>
+        <p>Each provider has env vars for its API key, base URL, and model. For example, DeepSeek uses
+          <code>DEEPSEEK_API_KEY</code>, <code>DEEPSEEK_BASE_URL</code>, and <code>DEEPSEEK_MODEL</code>.
+          Ollama Local requires no API key — just set <code>OLLAMA_LOCAL_ENABLED=true</code> and
+          <code>OLLAMA_LOCAL_MODEL</code> to your preferred local model.</p>
+      </div>
+
+      <div class="callout callout-warn">
+        <div class="callout-title">More providers coming</div>
+        <p>Google Gemini, Mistral, and other providers are on the roadmap. Mercury's OpenAI-compatible provider
+          architecture means you can often configure additional providers by setting a custom base URL and API key.</p>
+      </div>
+
+      <h2 id="scheduling">Scheduling</h2>
+      <p>Mercury can schedule tasks using cron expressions or one-shot delays.</p>
+      <h3>Recurring tasks</h3>
+      <p>Tell Mercury in conversation:</p>
+      <ul>
+        <li>"Remind me every day at 9am to check the server"</li>
+        <li>"Schedule a weekly summary every Monday at 10am"</li>
+      </ul>
+      <h3>One-shot delays</h3>
+      <ul>
+        <li>"Remind me in 15 minutes to take a break"</li>
+        <li>"Ping me in 2 hours about the deployment"</li>
+      </ul>
+      <p>Tasks persist to <code>~/.mercury/schedules.yaml</code> and restore on restart. Responses route back to the
+        channel (CLI or Telegram) where the task was created.</p>
+
+      <h2 id="skills">Skills</h2>
+      <p>Skills are markdown-based extensions that live in <code>~/.mercury/skills/&lt;name&gt;/SKILL.md</code>.</p>
+      <h3>Installing</h3>
+      <p>Tell Mercury in conversation:</p>
+      <ul>
+        <li>"Install skill from https://example.com/my-skill.md"</li>
+        <li>Or paste the SKILL.md content directly</li>
+      </ul>
+      <h3>Invoking</h3>
+      <ul>
+        <li>"Use the daily-digest skill"</li>
+      </ul>
+      <h3>Scheduling a skill</h3>
+      <ul>
+        <li>"Remind me daily at 9am to run the daily-digest skill"</li>
+      </ul>
+      <p>Skills follow the <a href="https://agentskills.io" target="_blank" rel="noopener">Agent Skills specification</a>.
+        They get elevated permissions via <code>allowed-tools</code> and are loaded with progressive disclosure to save
+        tokens.</p>
+
+    </main>
+  </div>
+
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">☿ Mercury</span>
+        <span class="footer-tagline">by Cosmic Stack</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://mercury.cosmicstack.org">mercury.cosmicstack.org</a>
+        <a href="https://github.com/cosmicstack-labs/mercury-agent">GitHub</a>
+        <a href="https://github.com/cosmicstack-labs/mercury-agent/issues">Issues</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    function showPlatform(id, btn) {
+      document.querySelectorAll('.platform-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.platform-tab').forEach(el => el.classList.remove('active'));
+      document.getElementById('platform-' + id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // Highlight sidebar on scroll
+    const sidebarLinks = document.querySelectorAll('.docs-sidebar a');
+    const sections = [];
+    sidebarLinks.forEach(link => {
+      const id = link.getAttribute('href')?.slice(1);
+      if (id) {
+        const el = document.getElementById(id);
+        if (el) sections.push({ link, el });
+      }
+    });
+
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY + 100;
+      let current = sections[0];
+      for (const s of sections) {
+        if (s.el.offsetTop <= scrollY) current = s;
+      }
+      sidebarLinks.forEach(l => l.classList.remove('active'));
+      if (current) current.link.classList.add('active');
+    }, { passive: true });
+
+    fetch('https://api.github.com/repos/cosmicstack-labs/mercury-agent')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var el = document.getElementById('ghStars');
+        if (el && data.stargazers_count != null) {
+          var n = data.stargazers_count;
+          el.textContent = n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : n;
+        }
+      })
+      .catch(function () {});
+  </script>
+
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-modal" onclick="event.stopPropagation()">
+      <div class="search-input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="search-input" id="searchInput" type="text" placeholder="Search documentation..." autocomplete="off">
+        <span class="search-input-hint" id="searchHintEsc">ESC</span>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+      <div class="search-footer">
+        <span><kbd>↑↓</kbd> navigate</span>
+        <span><kbd>↵</kbd> open</span>
+        <span><kbd id="searchKbdFooter">esc</kbd> close</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 ||
+                navigator.userAgent.indexOf('Mac') > -1;
+    var modKey = isMac ? '\u2318' : 'Ctrl';
+    var modKeyShort = isMac ? '\u2318K' : 'Ctrl+K';
+
+    document.getElementById('searchKbdNav').textContent = modKeyShort;
+    document.getElementById('searchKbdFooter').textContent = isMac ? '\u2318K' : 'Ctrl+K';
+
+    var overlay = document.getElementById('searchOverlay');
+    var input = document.getElementById('searchInput');
+    var resultsEl = document.getElementById('searchResults');
+
+    var sections = [];
+    var currentH2 = '';
+
+    document.querySelectorAll('.docs-content h2, .docs-content h3').forEach(function (el) {
+      if (el.tagName === 'H2') currentH2 = el.textContent.trim();
+      sections.push({
+        id: el.id,
+        title: el.textContent.trim(),
+        section: el.tagName === 'H3' ? currentH2 : '',
+        level: el.tagName
+      });
+    });
+
+    var activeIndex = -1;
+    var matchedItems = [];
+
+    function highlight(text, query) {
+      if (!query) return text;
+      var escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return text.replace(new RegExp('(' + escaped + ')', 'gi'), '<mark>$1</mark>');
+    }
+
+    function search(query) {
+      resultsEl.innerHTML = '';
+      matchedItems = [];
+      activeIndex = -1;
+
+      if (!query.trim()) {
+        sections.slice(0, 8).forEach(function (s) {
+          matchedItems.push(s);
+          var div = document.createElement('a');
+          div.className = 'search-result-item';
+          div.href = '#' + s.id;
+          div.setAttribute('data-index', matchedItems.length - 1);
+          div.innerHTML = (s.section ? '<div class="search-result-section">' + s.section + '</div>' : '') +
+            '<div class="search-result-title">' + s.title + '</div>';
+          div.onclick = function (e) { e.preventDefault(); navigateTo(s.id); };
+          resultsEl.appendChild(div);
+        });
+        return;
+      }
+
+      var q = query.toLowerCase();
+      sections.forEach(function (s) {
+        if (s.title.toLowerCase().indexOf(q) !== -1) {
+          matchedItems.push(s);
+        }
+      });
+
+      if (matchedItems.length === 0) {
+        resultsEl.innerHTML = '<div class="search-empty">No results found</div>';
+        return;
+      }
+
+      matchedItems.forEach(function (s, i) {
+        var div = document.createElement('a');
+        div.className = 'search-result-item';
+        div.href = '#' + s.id;
+        div.setAttribute('data-index', i);
+        div.innerHTML = (s.section ? '<div class="search-result-section">' + highlight(s.section, query) + '</div>' : '') +
+          '<div class="search-result-title">' + highlight(s.title, query) + '</div>';
+        div.onclick = function (e) { e.preventDefault(); navigateTo(s.id); };
+        resultsEl.appendChild(div);
+      });
+
+      setActive(0);
+    }
+
+    function setActive(idx) {
+      if (idx < 0) idx = matchedItems.length - 1;
+      if (idx >= matchedItems.length) idx = 0;
+      activeIndex = idx;
+      var items = resultsEl.querySelectorAll('.search-result-item');
+      items.forEach(function (el, i) {
+        el.classList.toggle('active', i === idx);
+      });
+      if (items[idx]) items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function navigateTo(id) {
+      closeSearch();
+      var target = document.getElementById(id);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        target.style.outline = '2px solid var(--cyan)';
+        setTimeout(function () { target.style.outline = ''; }, 1500);
+      }
+    }
+
+    function openSearch() {
+      overlay.classList.add('open');
+      input.value = '';
+      input.focus();
+      search('');
+    }
+
+    function closeSearch() {
+      overlay.classList.remove('open');
+      input.value = '';
+    }
+
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) closeSearch();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if ((isMac ? e.metaKey : e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (overlay.classList.contains('open')) closeSearch();
+        else openSearch();
+        return;
+      }
+      if (!overlay.classList.contains('open')) return;
+
+      if (e.key === 'Escape') {
+        closeSearch();
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActive(activeIndex + 1);
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActive(activeIndex - 1);
+        return;
+      }
+      if (e.key === 'Enter' && activeIndex >= 0 && activeIndex < matchedItems.length) {
+        e.preventDefault();
+        navigateTo(matchedItems[activeIndex].id);
+        return;
+      }
+    });
+
+    input.addEventListener('input', function () {
+      search(this.value);
+    });
+
+    search('');
+  })();
+  </script>
+</body>
+
+</html>

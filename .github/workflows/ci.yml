@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  typecheck:
+    name: Typecheck (Node ${{ matrix.node }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 20
+          - os: ubuntu-latest
+            node: 22
+          - os: windows-latest
+            node: 22
+          - os: macos-latest
+            node: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: Test (Node ${{ matrix.node }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 20
+          - os: ubuntu-latest
+            node: 22
+          - os: windows-latest
+            node: 22
+          - os: macos-latest
+            node: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+
+  pack-verify:
+    name: Pack & Verify (Node ${{ matrix.node }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: 22
+          - os: windows-latest
+            node: 22
+          - os: macos-latest
+            node: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+      - name: Verify package integrity
+        run: node scripts/verify-package.cjs
+
+  termux:
+    name: Termux (Android, x86_64)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run CI in Termux container
+        shell: bash
+        run: |
+          docker run --rm \
+            --privileged \
+            --entrypoint /entrypoint_root.sh \
+            -v "${{ github.workspace }}:/home/builder/project" \
+            -e "HOME=/home/builder" \
+            termux/termux-docker:x86_64 \
+            bash -c "
+              set -e
+              chown -R system:system /home/builder/project
+              su - system -c '
+                set -e
+                pkg update -y
+                pkg install -y git nodejs-lts
+                cd /home/builder/project
+                npm ci
+                npm run build
+                npm test
+              '
+            "

@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mercury — Soul-Driven AI Agent with Permission Guardrails | Cosmic Stack</title>
+  <meta name="description"
+    content="The AI agent that asks before it acts. Permission guardrails, token efficiency, full control, and GitHub companion. Runs 24/7 from CLI or Telegram with multi-provider onboarding, model selection, skills, and scheduling.">
+  <meta name="author" content="Cosmic Stack">
+  <meta name="robots" content="index, follow">
+  <meta name="keywords"
+    content="ai agent, personal assistant, cli agent, telegram bot, permission-hardened, token budget, soul-driven, open source, mercury, cosmicstack">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="canonical" href="https://mercury.cosmicstack.org">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Mercury — Soul-Driven AI Agent with Permission Guardrails">
+  <meta property="og:description"
+    content="The AI agent that asks before it acts. Permission guardrails, token efficiency, and full control. Runs 24/7 from CLI or Telegram with multi-provider onboarding and model selection.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mercury.cosmicstack.org">
+  <meta property="og:image" content="https://mercury.cosmicstack.org/card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"
+    content="Mercury — Soul-Driven AI Agent. Permission Guardrails. Token Efficiency. Full Control.">
+  <meta property="og:site_name" content="Mercury">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mercury — Soul-Driven AI Agent with Permission Guardrails">
+  <meta name="twitter:description"
+    content="The AI agent that asks before it acts. Permission guardrails, token efficiency, and full control with multi-provider onboarding.">
+  <meta name="twitter:image" content="https://mercury.cosmicstack.org/card.png">
+  <meta name="twitter:image:alt"
+    content="Mercury — Soul-Driven AI Agent. Permission Guardrails. Token Efficiency. Full Control.">
+  <meta name="twitter:site" content="@cosmicstack">
+  <meta name="twitter:creator" content="@cosmicstack">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Mercury",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Node.js 18+",
+    "description": "Soul-driven AI agent with permission guardrails, token budgets, and multi-channel access. 31 built-in tools, skill system, GitHub companion. Runs 24/7 from CLI or Telegram.",
+    "url": "https://mercury.cosmicstack.org",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "Cosmic Stack",
+      "url": "https://github.com/cosmicstack-labs"
+    },
+    "programmingLanguage": "TypeScript",
+    "codeRepository": "https://github.com/cosmicstack-labs/mercury-agent"
+  }
+  </script>
+
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☿</text></svg>">
+  <script async src="https://analytics.cosmicstack.org/js/pa--flkUFvdfmsPSUtRivKAK.js"></script>
+  <script>window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()</script>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <nav id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">☿ Mercury</a>
+      <div class="nav-links" id="navLinks">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">Install</a>
+        <a href="#demo">Demo</a>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#github">GitHub</a>
+        <a href="#compare">Compare</a>
+        <a href="docs.html">Docs</a>
+        <a href="https://github.com/cosmicstack-labs/mercury-agent" class="github-btn" target="_blank" rel="noopener">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" style="vertical-align:-2px;"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span class="github-btn-text">Star</span>
+          <span class="github-btn-count" id="ghStars"></span>
+        </a>
+      </div>
+      <button class="nav-toggle" id="navToggle" aria-label="Menu">☰</button>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="container hero-content">
+      <pre class="hero-ascii" aria-hidden="true">
+   __  _____________  ________  ________  __
+  /  |/  / ____/ __ \/ ____/ / / / __ \ \/ /
+ / /|_/ / __/ / /_/ / /   / / / / /_/ /\  /
+/ /  / / /___/ _, _/ /___/ /_/ / _, _/ / /
+/_/  /_/_____/_/ |_|\____/\____/_/ |_| /_/
+      </pre>
+      <p class="hero-tagline">Soul-driven. Token-efficient. Always on.</p>
+      <p class="hero-sub">Your personal AI agent with 31 built-in tools, skill system, multi-channel access, GitHub companion, and
+        hardened permissions. Runs 24/7 from your terminal or Telegram.</p>
+      <div class="hero-actions">
+        <a href="#how-it-works" class="btn btn-primary">Get Started</a>
+        <a href="#demo" class="btn btn-secondary">See it in action</a>
+      </div>
+      <div class="hero-install">
+        <code>npm i -g @cosmicstack/mercury-agent && mercury</code>
+      </div>
+      <div class="terminal-window hero-terminal">
+        <div class="terminal-bar">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">terminal</span>
+        </div>
+        <div class="terminal-body" id="heroTerminal"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section">
+    <div class="container">
+      <h2 class="section-title">Built Different</h2>
+      <p class="section-sub">Not another chatbot. An orchestrator that works for you.</p>
+      <div class="features-grid">
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">☿</div>
+          <h3>Soul-Driven Identity</h3>
+          <p>Mercury isn't a blank slate. Its personality is defined by markdown soul files — soul.md, persona.md,
+            taste.md, heartbeat.md — that you control. No corporate wrapper. Your agent, your rules.</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">⚡</div>
+          <h3>Token-Efficient</h3>
+          <p>Daily token budgets with enforcement. Only soul + persona injected per request (~400 tokens). Skill
+            summaries loaded progressively. Auto-concise mode when budget exceeds 70%.</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">♾</div>
+          <h3>Always On</h3>
+          <p>Background daemon by default. Cron scheduling, delayed tasks, and a heartbeat system that monitors budget and upcoming tasks. Auto-starts on boot, auto-restarts on crash. Use <code>--foreground</code> for attached mode.</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">📡</div>
+          <h3>Multi-Channel</h3>
+          <p>CLI with readline and arrow-key command menus. Telegram with typing indicators, HTML formatting, file uploads, and private 1:1 access approval.
+            More channels coming: Signal, Discord, Slack, WhatsApp.</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">🧩</div>
+          <h3>Skill System</h3>
+          <p>Install community skills with a single command. Skills auto-load into context, get elevated permissions,
+            and can be scheduled as recurring tasks. Based on the Agent Skills specification.</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">🛡</div>
+          <h3>Permission Hardened</h3>
+          <p>Folder-level read/write scoping. Command blocklist (sudo, rm -rf, etc. — never executed). Pending approval
+            flow. Ask Me or Allow All mode per session.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="second-brain" class="section section-alt">
+    <div class="container">
+      <h2 class="section-title">🧠 Second Brain</h2>
+      <p class="section-subtitle">Most AI agents forget everything when you close the chat. Mercury <em>remembers</em> — automatically, privately, and with surgical precision.</p>
+
+      <div class="brain-grid">
+        <div class="brain-card" data-reveal>
+          <h3>Learns Automatically</h3>
+          <p>After each conversation, Mercury extracts facts about you — your preferences, goals, projects, habits, relationships, and decisions. No manual entry needed.</p>
+        </div>
+        <div class="brain-card" data-reveal>
+          <h3>Recalls What Matters</h3>
+          <p>Only memories relevant to the current conversation are injected — up to 5 facts within a 900-character budget. Your context window stays clean.</p>
+        </div>
+        <div class="brain-card" data-reveal>
+          <h3>Resolves Conflicts</h3>
+          <p>Preferences change. When Mercury detects a contradiction (you liked X, now you prefer Y), the higher-confidence memory wins. No stale data.</p>
+        </div>
+        <div class="brain-card" data-reveal>
+          <h3>10 Memory Types</h3>
+          <p>Identity, preference, goal, project, habit, decision, constraint, relationship, episode, and reflection — each scored by confidence, importance, and durability.</p>
+        </div>
+        <div class="brain-card" data-reveal>
+          <h3>Auto-Consolidation</h3>
+          <p>Every hour Mercury synthesizes a profile summary and generates reflections from patterns it detects. Active memories promote to durable when reinforced 3+ times.</p>
+        </div>
+        <div class="brain-card" data-reveal>
+          <h3>You Stay in Control</h3>
+          <p><code>/memory</code> gives you overview, search, pause, and clear. Second Brain can be disabled entirely via config. All data stays on your machine in SQLite — nothing leaves your machine.</p>
+        </div>
+      </div>
+
+      <div class="brain-architecture" data-reveal>
+        <h3>How It Works</h3>
+        <div class="brain-flow">
+          <div class="brain-step">
+            <div class="brain-step-num">1</div>
+            <div class="brain-step-content">
+              <strong>Extract</strong>
+              <p>After every conversation, a dedicated extraction pass pulls 0–3 facts. Each fact gets a type, confidence score (0–1), importance, and durability rating. Below 0.55 confidence? Rejected.</p>
+            </div>
+          </div>
+          <div class="brain-step">
+            <div class="brain-step-num">2</div>
+            <div class="brain-step-content">
+              <strong>Store &amp; Merge</strong>
+              <p>Facts land in SQLite with FTS5 full-text search. If a similar fact already exists, Mercury merges — incrementing evidence count, updating confidence, and resolving contradictions. No duplicates.</p>
+            </div>
+          </div>
+          <div class="brain-step">
+            <div class="brain-step-num">3</div>
+            <div class="brain-step-content">
+              <strong>Recall</strong>
+              <p>Before each message, a FTS5 query retrieves the top 5 relevant memories within a 900-character budget. Only what matters enters context. Your token spend stays low.</p>
+            </div>
+          </div>
+          <div class="brain-step">
+            <div class="brain-step-num">4</div>
+            <div class="brain-step-content">
+              <strong>Consolidate &amp; Prune</strong>
+              <p>Every 60 minutes: profile synthesis, reflection generation, and active→durable promotion (3+ evidence). Auto-pruning dismisses stale active memories (21 days) and decays low-confidence durables (120 days).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="brain-note" data-reveal>
+        <p><strong>Why it matters:</strong> This isn't a chat history dump. It's a structured knowledge graph that improves with every conversation — the more you use Mercury, the better it gets. And because it uses SQLite + FTS5 on your local machine, recall is instant, search is sub-millisecond, and your data never leaves <code>~/.mercury/</code>. Enable/disable: <code>SECOND_BRAIN_ENABLED=false</code> env var or <code>memory.secondBrain.enabled: false</code> in <code>~/.mercury/mercury.yaml</code>. Enabled by default.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works" class="section section-dark">
+    <div class="container">
+      <h2 class="section-title">Up and Running in 60 Seconds</h2>
+      <div class="steps">
+        <div class="step" data-reveal>
+          <div class="step-number">1</div>
+          <h3>Install</h3>
+          <div class="terminal-inline">
+            <code>npm i -g @cosmicstack/mercury-agent</code>
+          </div>
+          <p>Or use <code>npx @cosmicstack/mercury-agent</code> — no install needed.</p>
+        </div>
+        <div class="step" data-reveal>
+          <div class="step-number">2</div>
+          <h3>Setup</h3>
+          <div class="terminal-inline">
+            <code>mercury</code>
+          </div>
+          <p>First run triggers the onboarding wizard. Choose one or more providers, validate each key by fetching models, pick your default model, and optionally pair Telegram with a bot token plus pairing code.</p>
+        </div>
+        <div class="step" data-reveal>
+          <div class="step-number">3</div>
+          <h3>Run</h3>
+          <div class="terminal-inline">
+            <code>mercury start</code>
+          </div>
+          <p>Mercury wakes up, loads your soul files, restores scheduled tasks, and runs as a background daemon. Start talking via Telegram or use <code>mercury start --foreground</code> for attached mode.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="demo" class="section">
+    <div class="container">
+      <h2 class="section-title">See It Work</h2>
+      <p class="section-sub">A real Mercury session — tool calls, streaming, files, and scheduling.</p>
+      <div class="terminal-window demo-terminal">
+        <div class="terminal-bar">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">mercury</span>
+        </div>
+        <div class="terminal-body" id="demoTerminal"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="capabilities" class="section section-dark">
+    <div class="container">
+      <h2 class="section-title">31 Built-In Tools</h2>
+      <p class="section-sub">Plus extensible skills, scheduling, and memory.</p>
+      <div class="caps-grid">
+        <div class="cap-group" data-reveal>
+          <h3>📂 Filesystem</h3>
+          <ul>
+            <li><code>read_file</code> — Read file contents</li>
+            <li><code>write_file</code> — Write to existing file</li>
+            <li><code>create_file</code> — Create new files (+ dirs)</li>
+            <li><code>edit_file</code> — Search &amp; replace text</li>
+            <li><code>list_dir</code> — List directory contents</li>
+            <li><code>delete_file</code> — Delete a file</li>
+            <li><code>send_file</code> — Send file to user (Telegram upload)</li>
+            <li><code>approve_scope</code> — Request directory access</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>💬 Messaging</h3>
+          <ul>
+            <li><code>send_message</code> — Send a message to approved Telegram recipients</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>🐚 Shell</h3>
+          <ul>
+            <li><code>run_command</code> — Execute shell commands</li>
+            <li><code>cd</code> — Change working directory (persists)</li>
+            <li><code>approve_command</code> — Permanently approve a command</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>📦 Git</h3>
+          <ul>
+            <li><code>git_status</code> — Working tree status</li>
+            <li><code>git_diff</code> — Show file changes</li>
+            <li><code>git_log</code> — Commit history</li>
+            <li><code>git_add</code> — Stage files</li>
+            <li><code>git_commit</code> — Create commits</li>
+            <li><code>git_push</code> — Push to remote</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>🌐 Web</h3>
+          <ul>
+            <li><code>fetch_url</code> — Fetch &amp; strip HTML to text</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>🐙 GitHub</h3>
+          <ul>
+            <li><code>create_pr</code> — Create pull requests</li>
+            <li><code>review_pr</code> — Review PRs + post comments</li>
+            <li><code>list_issues</code> — List &amp; filter issues</li>
+            <li><code>create_issue</code> — Create new issues</li>
+            <li><code>github_api</code> — Raw API access (escape hatch)</li>
+            <li>Co-authored-by on every commit</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>🧩 Skills</h3>
+          <ul>
+            <li><code>install_skill</code> — Install from URL or content</li>
+            <li><code>list_skills</code> — Show installed skills</li>
+            <li><code>use_skill</code> — Invoke a skill</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>⏰ Scheduler</h3>
+          <ul>
+            <li><code>schedule_task</code> — Cron or one-shot tasks</li>
+            <li><code>list_scheduled_tasks</code> — View all tasks</li>
+            <li><code>cancel_scheduled_task</code> — Cancel a task</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>📊 System</h3>
+          <ul>
+            <li><code>budget_status</code> — Check token budget</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>🧠 Memory</h3>
+          <ul>
+            <li>Short-term — Recent conversation per channel</li>
+            <li>Long-term — Auto-extracted facts with dedup</li>
+            <li>Episodic — Timestamped interaction log</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare" class="section">
+    <div class="container">
+      <h2 class="section-title">Honest Comparison</h2>
+      <p class="section-sub">We built Mercury because nothing else did all of this.</p>
+      <div class="compare-table" data-reveal>
+        <table>
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th class="highlight">Mercury</th>
+              <th>Open Interpreter</th>
+              <th>Claude Code</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Soul / Persona System</td>
+              <td class="highlight">4 markdown files</td>
+              <td class="partial">Custom instructions</td>
+              <td class="partial">CLAUDE.md</td>
+            </tr>
+            <tr>
+              <td>Token Budget Enforcement</td>
+              <td class="highlight">Daily budget + override</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Multi-Channel (CLI + Telegram)</td>
+              <td class="highlight">Both + more coming</td>
+              <td class="partial">All</td>
+              <td class="partial">All</td>
+            </tr>
+            <tr>
+              <td>Skill System (Agent Skills spec)</td>
+              <td class="highlight">Install, invoke, schedule</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Cron + Delayed Scheduling</td>
+              <td class="highlight">Persisted, auto-restore</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Permission Hardening</td>
+              <td class="highlight">Blocklist + scope + approval</td>
+              <td class="partial">Confirmation prompts</td>
+              <td class="partial">Permission prompts</td>
+            </tr>
+            <tr>
+              <td>GitHub Companion</td>
+              <td class="highlight">PRs, issues, co-authored commits</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Proactive Notifications</td>
+              <td class="highlight">Heartbeat + task alerts</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Auto Fact Extraction</td>
+              <td class="highlight">With dedup</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Provider Fallback</td>
+              <td class="highlight">Auto with last-successful</td>
+              <td class="partial">Manual config</td>
+              <td class="no">Anthropic only</td>
+            </tr>
+            <tr>
+              <td>File Upload (Telegram)</td>
+              <td class="highlight">Yes — auto type detection</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Streaming Output (CLI)</td>
+              <td class="highlight">Real-time text stream</td>
+              <td class="highlight">Real-time text stream</td>
+              <td class="highlight">Real-time text stream</td>
+            </tr>
+            <tr>
+              <td>Headless / 24-7 Mode</td>
+              <td class="highlight">Built-in</td>
+              <td class="no">—</td>
+              <td class="no">—</td>
+            </tr>
+            <tr>
+              <td>Language / Runtime</td>
+              <td class="highlight">TypeScript / Node.js</td>
+              <td class="highlight">Python</td>
+              <td class="highlight">TypeScript / Node.js</td>
+            </tr>
+            <tr>
+              <td>Open Source</td>
+              <td class="highlight">MIT</td>
+              <td class="partial">LGPL-2.1</td>
+              <td class="no">Source-available</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="daemon" class="section section-dark">
+    <div class="container">
+      <h2 class="section-title">Always On. Any Platform.</h2>
+      <p class="section-sub">Daemon by default. Auto-starts on boot. Auto-restarts on crash.</p>
+      <div class="terminal-window" style="max-width: 680px; margin: 0 auto 48px;">
+        <div class="terminal-bar">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">terminal</span>
+        </div>
+        <div class="terminal-body" style="min-height: auto; padding: 16px 24px;">
+          <p style="margin:0;color:var(--gray);">$ <span style="color:var(--cyan);">mercury start</span></p>
+          <p style="margin:0;color:var(--cyan);">Starting Mercury in background...</p>
+          <p style="margin:0;color:var(--white);">Mercury started in background (PID: 48291)</p>
+          <p style="margin:0;color:var(--gray-dim);">Auto-starts on login. Auto-restarts on crash.</p>
+        </div>
+      </div>
+      <div class="caps-grid" style="max-width: 900px; margin: 0 auto;">
+        <div class="cap-group" data-reveal>
+          <h3>Commands</h3>
+          <ul>
+            <li><code>mercury start</code> — Start daemon (default)</li>
+            <li><code>mercury start --foreground</code> — Attached mode</li>
+            <li><code>mercury up</code> — Install service + start daemon</li>
+            <li><code>mercury restart</code> — Restart background process</li>
+            <li><code>mercury stop</code> — Stop background process</li>
+            <li><code>mercury doctor</code> — Reconfigure (Enter keeps values)</li>
+            <li><code>/</code> <code>/menu</code> <code>/telegram</code> — Arrow-key command menus in CLI chat</li>
+          </ul>
+        </div>
+        <div class="cap-group" data-reveal>
+          <h3>Platform Support</h3>
+          <ul>
+            <li><strong>macOS</strong> — LaunchAgent (no sudo)</li>
+            <li><strong>Linux</strong> — systemd user unit (no sudo)</li>
+            <li><strong>Windows</strong> — Task Scheduler (no admin)</li>
+            <li><strong>Crash recovery</strong> — Exponential backoff watchdog</li>
+            <li><strong>Zero deps</strong> — No PM2, forever, or NSSM needed</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="github" class="section">
+    <div class="container">
+      <h2 class="section-title">GitHub Companion</h2>
+      <p class="section-sub">Your agent, your commits, your repos.</p>
+      <div class="features-grid" style="max-width: 900px; margin: 0 auto;">
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">🐙</div>
+          <h3>Co-Authored Commits</h3>
+          <p>Every Mercury-assisted commit gets a <code>Co-authored-by: Mercury</code> trailer. Mercury's avatar appears alongside yours in GitHub's commit history.</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">🔀</div>
+          <h3>Pull Requests</h3>
+          <p>Create PRs, review diffs, and post review comments — all through Mercury's tools. Just say "create a PR" or "review the open PRs".</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">📋</div>
+          <h3>Issue Management</h3>
+          <p>List, filter, and create issues. Schedule daily issue checks. Mercury keeps your backlog moving without you touching the browser.</p>
+        </div>
+        <div class="feature-card" data-reveal>
+          <div class="feature-icon">🔑</div>
+          <h3>Self-Hosted Auth</h3>
+          <p>Uses a fine-grained Personal Access Token stored on your machine. No accounts, no OAuth servers, no cloud dependencies. Your token, your repos, your control.</p>
+        </div>
+      </div>
+      <div class="terminal-window" style="max-width: 680px; margin: 48px auto 0;">
+        <div class="terminal-bar">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">terminal</span>
+        </div>
+        <div class="terminal-body" style="min-height: auto; padding: 16px 24px;">
+          <p style="margin:0;color:var(--gray);">$ <span style="color:var(--cyan);">mercury doctor</span></p>
+          <p style="margin:0;color:var(--gray-dim);">GitHub username: salmanqureshi</p>
+          <p style="margin:0;color:var(--gray-dim);">GitHub email: mercury@cosmicstack.org</p>
+          <p style="margin:0;color:var(--gray-dim);">GitHub PAT (repo scope): ••••••••</p>
+          <p style="margin:0;color:var(--green);">✓ GitHub tools registered (5)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="architecture" class="section section-dark">
+    <div class="container">
+      <h2 class="section-title">Under the Hood</h2>
+      <p class="section-sub">Minimal runtime, maximum capability.</p>
+      <div class="arch-grid">
+        <div class="arch-card" data-reveal>
+          <div class="arch-label">Core</div>
+          <div class="arch-value">TypeScript + Node.js 18+</div>
+          <div class="arch-desc">ESM, tsup build, SQLite-backed second brain</div>
+        </div>
+        <div class="arch-card" data-reveal>
+          <div class="arch-label">AI SDK</div>
+          <div class="arch-value">Vercel AI SDK v4</div>
+          <div class="arch-desc">streamText + generateText, 10-step agentic loop</div>
+        </div>
+        <div class="arch-card" data-reveal>
+          <div class="arch-label">Providers</div>
+          <div class="arch-value">DeepSeek · OpenAI · Anthropic · Grok · Ollama Cloud · Ollama Local</div>
+          <div class="arch-desc">Validated onboarding, model discovery, and fallback with last-successful tracking</div>
+        </div>
+        <div class="arch-card" data-reveal>
+          <div class="arch-label">Memory</div>
+          <div class="arch-value">JSONL + SQLite</div>
+          <div class="arch-desc">Short-term, long-term, episodic + second brain</div>
+        </div>
+        <div class="arch-card" data-reveal>
+          <div class="arch-label">Telegram</div>
+          <div class="arch-value">grammY</div>
+          <div class="arch-desc">Long polling, pairing codes, CLI-managed access requests, broadcasts, file uploads</div>
+        </div>
+        <div class="arch-card" data-reveal>
+          <div class="arch-label">Runtime Data</div>
+          <div class="arch-value">~/.mercury/</div>
+          <div class="arch-desc">Config, soul, memory, permissions, skills, schedules — all in your home dir</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="providers" class="section">
+    <div class="container">
+      <h2 class="section-title">Supported Providers</h2>
+      <p class="section-sub">Pick one or stack them all. Mercury falls back automatically.</p>
+      <div class="provider-grid" data-reveal>
+        <div class="provider-card">
+          <div class="provider-logo">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M23.748 4.651c-.254-.124-.364.113-.512.233-.051.04-.094.09-.137.137-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.155-.708-.311-.955-.65-.172-.24-.219-.509-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.094.172.187.129.323-.082.28-.18.553-.266.833-.055.179-.137.218-.328.14a5.5 5.5 0 0 1-1.737-1.179c-.857-.828-1.631-1.743-2.597-2.46a12 12 0 0 0-.689-.47c-.985-.957.13-1.743.387-1.836.27-.098.094-.433-.778-.428-.872.003-1.67.295-2.687.685a3 3 0 0 1-.465.136 9.6 9.6 0 0 0-2.883-.101c-1.885.21-3.39 1.1-4.497 2.622C.082 8.776-.231 10.854.152 13.02c.403 2.284 1.568 4.175 3.36 5.653 1.857 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.132-.284 4.994-1.86.47.234.962.328 1.78.398.629.058 1.235-.031 1.705-.129.735-.155.684-.836.418-.961-2.155-1.004-1.682-.595-2.112-.926 1.095-1.295 2.768-3.598 3.284-6.733.05-.346.115-.834.108-1.114-.004-.171.035-.238.23-.257a4.2 4.2 0 0 0 1.545-.475c1.397-.763 1.96-2.016 2.093-3.517.02-.23-.004-.467-.247-.588M11.58 18.168c-2.088-1.642-3.101-2.183-3.52-2.16-.39.024-.32.472-.234.763.09.288.207.487.371.74.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.168-1.361-.801-2.5-1.86-3.301-3.306-.775-1.393-1.225-2.888-1.299-4.482-.02-.385.094-.522.477-.592a4.7 4.7 0 0 1 1.53-.038c2.131.311 3.946 1.264 5.467 2.774.868.86 1.525 1.887 2.202 2.89.72 1.066 1.494 2.082 2.48 2.915.348.291.626.513.892.677-.802.09-2.14.109-3.055-.615zm1.001-6.44a.306.306 0 0 1 .415-.287.3.3 0 0 1 .113.074.3.3 0 0 1 .086.214c0 .17-.136.307-.308.307a.303.303 0 0 1-.306-.307m3.11 1.596c-.2.081-.4.151-.591.16a1.25 1.25 0 0 1-.798-.254c-.274-.23-.47-.358-.551-.758a1.7 1.7 0 0 1 .015-.588c.07-.327-.007-.537-.238-.727-.188-.156-.426-.199-.689-.199a.6.6 0 0 1-.254-.078.253.253 0 0 1-.114-.358 1 1 0 0 1 .192-.21c.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.392.451.462.576.685.915.176.264.336.536.446.848.066.194-.02.353-.25.45"/></svg>
+          </div>
+          <div class="provider-info">
+            <h3>DeepSeek</h3>
+            <p>Default provider. Cost-effective with strong reasoning. <code>deepseek-chat</code></p>
+          </div>
+        </div>
+        <div class="provider-card">
+          <div class="provider-logo provider-logo-openai">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.98 4.18a5.985 5.985 0 0 0-3.498 3.46 6.046 6.046 0 0 0 .743 7.096 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.497-3.462 6.056 6.056 0 0 0-.742-7.11zm-9.49 13.19a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM4.887 19.386a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.037.064l-4.837 2.792a4.504 4.504 0 0 1-6.139-1.649zM2.44 10.308a4.498 4.498 0 0 1 2.366-3.284v5.678a.771.771 0 0 0 .39.681l5.808 3.356-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.44 10.308zm15.773 2.055L12.37 9.001l2.02-1.163a.076.076 0 0 1 .071 0l4.83 2.791a4.499 4.499 0 0 1-.68 5.06l-.001-5.326zM20.21 10.78l-.142-.085-4.778-2.781a.776.776 0 0 0-.787 0L8.66 11.279V8.947a.064.064 0 0 1 .028-.067l4.837-2.792a4.5 4.5 0 0 1 1.658 6.698l.026-.006zM7.636 13.08l-2.02-1.164a.08.08 0 0 1-.037-.064V6.27a4.499 4.499 0 0 1 7.383-3.5l-.141.08-4.778 2.758a.77.77 0 0 0-.393.681l-.014 6.791zm1.097-2.365l2.602-1.5 2.607 1.5v3.006l-2.597 1.5-2.607-1.5-.005-3.006z"/></svg>
+          </div>
+          <div class="provider-info">
+            <h3>OpenAI</h3>
+            <p>GPT-4o-mini, GPT-4o, o3. Industry standard.</p>
+          </div>
+        </div>
+        <div class="provider-card">
+          <div class="provider-logo provider-logo-anthropic">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"/></svg>
+          </div>
+          <div class="provider-info">
+            <h3>Anthropic</h3>
+            <p>Claude Sonnet, Haiku, Opus. Nuanced reasoning.</p>
+          </div>
+        </div>
+        <div class="provider-card">
+          <div class="provider-logo provider-logo-xai">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.637 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z"/></svg>
+          </div>
+          <div class="provider-info">
+            <h3>Grok (xAI)</h3>
+            <p>xAI's models. OpenAI-compatible endpoint.</p>
+          </div>
+        </div>
+        <div class="provider-card">
+          <div class="provider-logo provider-logo-ollama">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M16.361 10.26a.894.894 0 0 0-.558.47l-.072.148.001.207c0 .193.004.217.059.353.076.193.152.312.291.448.24.238.51.3.872.205a.86.86 0 0 0 .517-.436.752.752 0 0 0 .08-.498c-.064-.453-.33-.782-.724-.897a1.06 1.06 0 0 0-.466 0zm-9.203.005c-.305.096-.533.32-.65.639a1.187 1.187 0 0 0-.06.52c.057.309.31.59.598.667.362.095.632.033.872-.205.14-.136.215-.255.291-.448.055-.136.059-.16.059-.353l.001-.207-.072-.148a.894.894 0 0 0-.565-.472 1.02 1.02 0 0 0-.474.007Zm4.184 2c-.131.071-.223.25-.195.383.031.143.157.288.353.407.105.063.112.072.117.136.004.038-.01.146-.029.243-.02.094-.036.194-.036.222.002.074.07.195.143.253.064.052.076.054.255.059.164.005.198.001.264-.03.169-.082.212-.234.15-.525-.052-.243-.042-.28.087-.355.137-.08.281-.219.324-.314a.365.365 0 0 0-.175-.48.394.394 0 0 0-.181-.033c-.126 0-.207.03-.355.124l-.085.053-.053-.032c-.219-.13-.259-.145-.391-.143a.396.396 0 0 0-.193.032zm.39-2.195c-.373.036-.475.05-.654.086-.291.06-.68.195-.951.328-.94.46-1.589 1.226-1.787 2.114-.04.176-.045.234-.045.53 0 .294.005.357.043.524.264 1.16 1.332 2.017 2.714 2.173.3.033 1.596.033 1.896 0 1.11-.125 2.064-.727 2.493-1.571.114-.226.169-.372.22-.602.039-.167.044-.23.044-.523 0-.297-.005-.355-.045-.531-.288-1.29-1.539-2.304-3.072-2.497a6.873 6.873 0 0 0-.855-.031zm.645.937a3.283 3.283 0 0 1 1.44.514c.223.148.537.458.671.662.166.251.26.508.303.82.02.143.01.251-.043.482-.08.345-.332.705-.672.957a3.115 3.115 0 0 1-.689.348c-.382.122-.632.144-1.525.138-.582-.006-.686-.01-.853-.042-.57-.107-1.022-.334-1.35-.68-.264-.28-.385-.535-.45-.946-.03-.192.025-.509.137-.776.136-.326.488-.73.836-.963.403-.269.934-.46 1.422-.512.187-.02.586-.02.773-.002zm-5.503-11a1.653 1.653 0 0 0-.683.298C5.617.74 5.173 1.666 4.985 2.819c-.07.436-.119 1.04-.119 1.503 0 .544.064 1.24.155 1.721.02.107.031.202.023.208a8.12 8.12 0 0 1-.187.152 5.324 5.324 0 0 0-.949 1.02 5.49 5.49 0 0 0-.94 2.339 6.625 6.625 0 0 0-.023 1.357c.091.78.325 1.438.727 2.04l.13.195-.037.064c-.269.452-.498 1.105-.605 1.732-.084.496-.095.629-.095 1.294 0 .67.009.803.088 1.266.095.555.288 1.143.503 1.534.071.128.243.393.264.407.007.003-.014.067-.046.141a7.405 7.405 0 0 0-.548 1.873c-.062.417-.071.552-.071.991 0 .56.031.832.148 1.279L3.42 24h1.478l-.05-.091c-.297-.552-.325-1.575-.068-2.597.117-.472.25-.819.498-1.296l.148-.29v-.177c0-.165-.003-.184-.057-.293a.915.915 0 0 0-.194-.25 1.74 1.74 0 0 1-.385-.543c-.424-.92-.506-2.286-.208-3.451.124-.486.329-.918.544-1.154a.787.787 0 0 0 .223-.531c0-.195-.07-.355-.224-.522a3.136 3.136 0 0 1-.817-1.729c-.14-.96.114-2.005.69-2.834.563-.814 1.353-1.336 2.237-1.475.199-.033.57-.028.776.01.226.04.367.028.512-.041.179-.085.268-.19.374-.431.093-.215.165-.333.36-.576.234-.29.46-.489.822-.729.413-.27.884-.467 1.352-.561.17-.035.25-.04.569-.04.319 0 .398.005.569.04a4.07 4.07 0 0 1 1.914.997c.117.109.398.457.488.602.034.057.095.177.132.267.105.241.195.346.374.43.14.068.286.082.503.045.343-.058.607-.053.943.016 1.144.23 2.14 1.173 2.581 2.437.385 1.108.276 2.267-.296 3.153-.097.15-.193.27-.333.419-.301.322-.301.722-.001 1.053.493.539.801 1.866.708 3.036-.062.772-.26 1.463-.533 1.854a2.096 2.096 0 0 1-.224.258.916.916 0 0 0-.194.25c-.054.109-.057.128-.057.293v.178l.148.29c.248.476.38.823.498 1.295.253 1.008.231 2.01-.059 2.581a.845.845 0 0 0-.044.098c0 .006.329.009.732.009h.73l.02-.074.036-.134c.019-.076.057-.3.088-.516.029-.217.029-1.016 0-1.258-.11-.875-.295-1.57-.597-2.226-.032-.074-.053-.138-.046-.141.008-.005.057-.074.108-.152.376-.569.607-1.284.724-2.228.031-.26.031-1.378 0-1.628-.083-.645-.182-1.082-.348-1.525a6.083 6.083 0 0 0-.329-.7l-.038-.064.131-.194c.402-.604.636-1.262.727-2.04a6.625 6.625 0 0 0-.024-1.358 5.512 5.512 0 0 0-.939-2.339 5.325 5.325 0 0 0-.95-1.02 8.097 8.097 0 0 1-.186-.152.692.692 0 0 1 .023-.208c.208-1.087.201-2.443-.017-3.503-.19-.924-.535-1.658-.98-2.082-.354-.338-.716-.482-1.15-.455-.996.059-1.8 1.205-2.116 3.01a6.805 6.805 0 0 0-.097.726c0 .036-.007.066-.015.066a.96.96 0 0 1-.149-.078A4.857 4.857 0 0 0 12 3.03c-.832 0-1.687.243-2.456.698a.958.958 0 0 1-.148.078c-.008 0-.015-.03-.015-.066a6.71 6.71 0 0 0-.097-.725C8.997 1.392 8.337.319 7.46.048a2.096 2.096 0 0 0-.585-.041Zm.293 1.402c.248.197.523.759.682 1.388.03.113.06.244.069.292.007.047.026.152.041.233.067.365.098.76.102 1.24l.002.475-.12.175-.118.178h-.278c-.324 0-.646.041-.954.124l-.238.06c-.033.007-.038-.003-.057-.144a8.438 8.438 0 0 1 .016-2.323c.124-.788.413-1.501.696-1.711.067-.05.079-.049.157.013zm9.825-.012c.17.126.358.46.498.888.28.854.36 2.028.212 3.145-.019.14-.024.151-.057.144l-.238-.06a3.693 3.693 0 0 0-.954-.124h-.278l-.119-.178-.119-.175.002-.474c.004-.669.066-1.19.214-1.772.157-.623.434-1.185.68-1.382.078-.062.09-.063.159-.012z"/></svg>
+          </div>
+          <div class="provider-info">
+            <h3>Ollama Cloud</h3>
+            <p>Remote Ollama models via API. No local setup.</p>
+          </div>
+        </div>
+        <div class="provider-card">
+          <div class="provider-logo provider-logo-ollama">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M16.361 10.26a.894.894 0 0 0-.558.47l-.072.148.001.207c0 .193.004.217.059.353.076.193.152.312.291.448.24.238.51.3.872.205a.86.86 0 0 0 .517-.436.752.752 0 0 0 .08-.498c-.064-.453-.33-.782-.724-.897a1.06 1.06 0 0 0-.466 0zm-9.203.005c-.305.096-.533.32-.65.639a1.187 1.187 0 0 0-.06.52c.057.309.31.59.598.667.362.095.632.033.872-.205.14-.136.215-.255.291-.448.055-.136.059-.16.059-.353l.001-.207-.072-.148a.894.894 0 0 0-.565-.472 1.02 1.02 0 0 0-.474.007Zm4.184 2c-.131.071-.223.25-.195.383.031.143.157.288.353.407.105.063.112.072.117.136.004.038-.01.146-.029.243-.02.094-.036.194-.036.222.002.074.07.195.143.253.064.052.076.054.255.059.164.005.198.001.264-.03.169-.082.212-.234.15-.525-.052-.243-.042-.28.087-.355.137-.08.281-.219.324-.314a.365.365 0 0 0-.175-.48.394.394 0 0 0-.181-.033c-.126 0-.207.03-.355.124l-.085.053-.053-.032c-.219-.13-.259-.145-.391-.143a.396.396 0 0 0-.193.032zm.39-2.195c-.373.036-.475.05-.654.086-.291.06-.68.195-.951.328-.94.46-1.589 1.226-1.787 2.114-.04.176-.045.234-.045.53 0 .294.005.357.043.524.264 1.16 1.332 2.017 2.714 2.173.3.033 1.596.033 1.896 0 1.11-.125 2.064-.727 2.493-1.571.114-.226.169-.372.22-.602.039-.167.044-.23.044-.523 0-.297-.005-.355-.045-.531-.288-1.29-1.539-2.304-3.072-2.497a6.873 6.873 0 0 0-.855-.031zm.645.937a3.283 3.283 0 0 1 1.44.514c.223.148.537.458.671.662.166.251.26.508.303.82.02.143.01.251-.043.482-.08.345-.332.705-.672.957a3.115 3.115 0 0 1-.689.348c-.382.122-.632.144-1.525.138-.582-.006-.686-.01-.853-.042-.57-.107-1.022-.334-1.35-.68-.264-.28-.385-.535-.45-.946-.03-.192.025-.509.137-.776.136-.326.488-.73.836-.963.403-.269.934-.46 1.422-.512.187-.02.586-.02.773-.002zm-5.503-11a1.653 1.653 0 0 0-.683.298C5.617.74 5.173 1.666 4.985 2.819c-.07.436-.119 1.04-.119 1.503 0 .544.064 1.24.155 1.721.02.107.031.202.023.208a8.12 8.12 0 0 1-.187.152 5.324 5.324 0 0 0-.949 1.02 5.49 5.49 0 0 0-.94 2.339 6.625 6.625 0 0 0-.023 1.357c.091.78.325 1.438.727 2.04l.13.195-.037.064c-.269.452-.498 1.105-.605 1.732-.084.496-.095.629-.095 1.294 0 .67.009.803.088 1.266.095.555.288 1.143.503 1.534.071.128.243.393.264.407.007.003-.014.067-.046.141a7.405 7.405 0 0 0-.548 1.873c-.062.417-.071.552-.071.991 0 .56.031.832.148 1.279L3.42 24h1.478l-.05-.091c-.297-.552-.325-1.575-.068-2.597.117-.472.25-.819.498-1.296l.148-.29v-.177c0-.165-.003-.184-.057-.293a.915.915 0 0 0-.194-.25 1.74 1.74 0 0 1-.385-.543c-.424-.92-.506-2.286-.208-3.451.124-.486.329-.918.544-1.154a.787.787 0 0 0 .223-.531c0-.195-.07-.355-.224-.522a3.136 3.136 0 0 1-.817-1.729c-.14-.96.114-2.005.69-2.834.563-.814 1.353-1.336 2.237-1.475.199-.033.57-.028.776.01.226.04.367.028.512-.041.179-.085.268-.19.374-.431.093-.215.165-.333.36-.576.234-.29.46-.489.822-.729.413-.27.884-.467 1.352-.561.17-.035.25-.04.569-.04.319 0 .398.005.569.04a4.07 4.07 0 0 1 1.914.997c.117.109.398.457.488.602.034.057.095.177.132.267.105.241.195.346.374.43.14.068.286.082.503.045.343-.058.607-.053.943.016 1.144.23 2.14 1.173 2.581 2.437.385 1.108.276 2.267-.296 3.153-.097.15-.193.27-.333.419-.301.322-.301.722-.001 1.053.493.539.801 1.866.708 3.036-.062.772-.26 1.463-.533 1.854a2.096 2.096 0 0 1-.224.258.916.916 0 0 0-.194.25c-.054.109-.057.128-.057.293v.178l.148.29c.248.476.38.823.498 1.295.253 1.008.231 2.01-.059 2.581a.845.845 0 0 0-.044.098c0 .006.329.009.732.009h.73l.02-.074.036-.134c.019-.076.057-.3.088-.516.029-.217.029-1.016 0-1.258-.11-.875-.295-1.57-.597-2.226-.032-.074-.053-.138-.046-.141.008-.005.057-.074.108-.152.376-.569.607-1.284.724-2.228.031-.26.031-1.378 0-1.628-.083-.645-.182-1.082-.348-1.525a6.083 6.083 0 0 0-.329-.7l-.038-.064.131-.194c.402-.604.636-1.262.727-2.04a6.625 6.625 0 0 0-.024-1.358 5.512 5.512 0 0 0-.939-2.339 5.325 5.325 0 0 0-.95-1.02 8.097 8.097 0 0 1-.186-.152.692.692 0 0 1 .023-.208c.208-1.087.201-2.443-.017-3.503-.19-.924-.535-1.658-.98-2.082-.354-.338-.716-.482-1.15-.455-.996.059-1.8 1.205-2.116 3.01a6.805 6.805 0 0 0-.097.726c0 .036-.007.066-.015.066a.96.96 0 0 1-.149-.078A4.857 4.857 0 0 0 12 3.03c-.832 0-1.687.243-2.456.698a.958.958 0 0 1-.148.078c-.008 0-.015-.03-.015-.066a6.71 6.71 0 0 0-.097-.725C8.997 1.392 8.337.319 7.46.048a2.096 2.096 0 0 0-.585-.041Zm.293 1.402c.248.197.523.759.682 1.388.03.113.06.244.069.292.007.047.026.152.041.233.067.365.098.76.102 1.24l.002.475-.12.175-.118.178h-.278c-.324 0-.646.041-.954.124l-.238.06c-.033.007-.038-.003-.057-.144a8.438 8.438 0 0 1 .016-2.323c.124-.788.413-1.501.696-1.711.067-.05.079-.049.157.013zm9.825-.012c.17.126.358.46.498.888.28.854.36 2.028.212 3.145-.019.14-.024.151-.057.144l-.238-.06a3.693 3.693 0 0 0-.954-.124h-.278l-.119-.178-.119-.175.002-.474c.004-.669.066-1.19.214-1.772.157-.623.434-1.185.68-1.382.078-.062.09-.063.159-.012z"/></svg>
+          </div>
+          <div class="provider-info">
+            <h3>Ollama Local</h3>
+            <p>On your machine. Zero API cost, fully private.</p>
+          </div>
+        </div>
+      </div>
+      <div class="provider-note">
+        <p>More providers on the way — Google Gemini, Mistral, and others. Mercury's OpenAI-compatible architecture also supports custom endpoints.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="cta" class="section cta-section">
+    <div class="container">
+      <h2 class="section-title">Ready to Deploy Your Agent?</h2>
+      <div class="cta-terminal">
+        <code>npm i -g @cosmicstack/mercury-agent && mercury</code>
+      </div>
+      <p class="cta-sub">That's it. 60 seconds to your own AI agent with GitHub companion.</p>
+      <div class="cta-links">
+        <a href="https://github.com/cosmicstack-labs/mercury-agent" target="_blank" rel="noopener">GitHub →</a>
+        <a href="https://github.com/cosmicstack-labs/mercury-agent/issues" target="_blank" rel="noopener">Report an
+          Issue →</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">☿ Mercury</span>
+        <span class="footer-tagline">by Cosmic Stack</span>
+      </div>
+      <div class="footer-links">
+        <a href="docs.html">Docs</a>
+        <a href="https://mercury.cosmicstack.org">mercury.cosmicstack.org</a>
+        <a href="https://github.com/cosmicstack-labs/mercury-agent">GitHub</a>
+        <a href="https://github.com/cosmicstack-labs/mercury-agent/issues">Issues</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
