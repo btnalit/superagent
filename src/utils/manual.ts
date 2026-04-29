@@ -173,6 +173,7 @@ export function getManual(): string {
     ['~/.mercury/skills/', 'Installed skills'],
     ['~/.mercury/schedules.yaml', 'Scheduled tasks'],
     ['~/.mercury/token-usage.json', 'Daily token usage tracking'],
+    ['~/.mercury/runtime-traces.jsonl', 'Runtime trace sink events'],
     ['~/.mercury/memory/', 'Short-term, long-term, episodic memory'],
   ];
 

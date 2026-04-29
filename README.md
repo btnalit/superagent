@@ -158,6 +158,8 @@ Type these during a conversation — they don't consume API tokens. Work on both
 | `/permissions` | Change permission mode (Ask Me / Allow All) |
 | `/tasks` | List scheduled tasks |
 | `/memory` | View and manage second brain memory |
+
+Runtime trace events are also written locally to `~/.mercury/runtime-traces.jsonl`. To export the same events as OpenTelemetry-compatible OTLP/HTTP spans, set `SUPERAGENT_TRACE_OTLP_ENDPOINT` or `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`.
 | `/unpair` | Telegram: reset all access |
 
 ## Built-in Tools

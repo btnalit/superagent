@@ -17,6 +17,7 @@ import {
   formatRuntimeTrace,
   type AgentRuntimeEvidence,
 } from './agent-runtime.js';
+import { createRuntimeTraceSinkFromEnv } from '../observability/trace-sink.js';
 import { Lifecycle } from './lifecycle.js';
 import { Scheduler } from './scheduler.js';
 import { logger } from '../utils/logger.js';
@@ -259,6 +260,9 @@ export class Agent {
   private telegramStreaming: boolean;
   private lastRuntimeEvidence?: AgentRuntimeEvidence;
   private evolutionProposals = new EvolutionProposalQueue(join(getMercuryHome(), 'evolution-proposals.jsonl'));
+  private runtimeTraceSink = createRuntimeTraceSinkFromEnv({
+    jsonlPath: join(getMercuryHome(), 'runtime-traces.jsonl'),
+  });
 
   constructor(
     private config: MercuryConfig,
@@ -429,6 +433,7 @@ export class Agent {
         toolNames: this.capabilities.getToolNames(),
         toolManifests: this.capabilities.getToolManifests(),
         skillSummaries: this.capabilities.getSkillSummaries(),
+        traceSink: this.runtimeTraceSink,
       });
       runtimeRun.transition('CONTRACTING');
 
@@ -440,6 +445,7 @@ export class Agent {
         const runtimeEvidence = runtimeRun.toEvidence(evaluation, evolutionFeedback);
         this.lastRuntimeEvidence = runtimeEvidence;
         this.evolutionProposals.enqueue(evolutionFeedback.proposals);
+        this.flushRuntimeTrace();
 
         this.shortTerm.add(msg.channelId, {
           id: msg.id,
@@ -918,6 +924,7 @@ export class Agent {
         const errMsg = `All LLM providers failed. Last error: ${lastError?.message || 'unknown'}`;
         logger.error({ err: lastError }, errMsg);
         runtimeRun.transition('FAILED');
+        this.flushRuntimeTrace();
         if (channel && msg.channelType !== 'internal') {
           await channel.send(errMsg, msg.channelId);
         }
@@ -936,6 +943,7 @@ export class Agent {
       const runtimeEvidence = runtimeRun.toEvidence(evaluation, evolutionFeedback);
       this.lastRuntimeEvidence = runtimeEvidence;
       this.evolutionProposals.enqueue(evolutionFeedback.proposals);
+      this.flushRuntimeTrace();
 
       this.tokenBudget.recordUsage({
         provider: usedProvider!.name,
@@ -1060,6 +1068,15 @@ Always specify owner and repo parameters on GitHub tools. The user's GitHub user
       prompt += githubHint;
     }
     return prompt;
+  }
+
+  private flushRuntimeTrace(): void {
+    const result = this.runtimeTraceSink.flush?.();
+    if (result && typeof (result as Promise<void>).catch === 'function') {
+      void (result as Promise<void>).catch((err) => {
+        logger.warn({ err }, 'Runtime trace sink flush failed');
+      });
+    }
   }
 
   async processInternalPrompt(prompt: string, channelId?: string, channelType?: string): Promise<void> {

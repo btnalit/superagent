@@ -2,6 +2,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { PermissionsManifest } from '../capabilities/permissions.js';
 import { listToolManifests, type ToolManifestEntry } from '../capabilities/tool-manifest.js';
+import type { RuntimeTraceSink } from '../observability/trace-sink.js';
 
 export type AgentRuntimeState =
   | 'RECEIVED'
@@ -171,6 +172,7 @@ export interface AgentRuntimeOptions {
   toolNames: string[];
   toolManifests?: ToolManifestEntry[];
   skillSummaries?: RuntimeSkillSummary[];
+  traceSink?: RuntimeTraceSink;
 }
 
 /** In-memory queue for data-only evolution proposals generated from runtime evidence. */
@@ -245,7 +247,14 @@ export class AgentRuntimeRun {
     readonly toolAuthority: ToolAuthoritySummary,
     readonly skillReliability: SkillReliabilitySummary,
     readonly contextQuality: number,
-  ) {}
+    private readonly traceSink?: RuntimeTraceSink,
+  ) {
+    this.emitTrace('onRunStarted', {
+      runId: this.runId,
+      timestamp: Date.now(),
+      goalContract: this.contract,
+    });
+  }
 
   transition(to: AgentRuntimeState): void {
     const allowed = VALID_TRANSITIONS[this.state].includes(to);
@@ -260,11 +269,17 @@ export class AgentRuntimeRun {
   }
 
   recordToolCall(name: string, input: Record<string, unknown>, failed: boolean): void {
-    this.toolCalls.push({
+    const toolCall: RuntimeToolCall = {
       name,
       inputPreview: stablePreview(input),
       failed,
       timestamp: Date.now(),
+    };
+    this.toolCalls.push(toolCall);
+    this.emitTrace('onToolCall', {
+      runId: this.runId,
+      timestamp: toolCall.timestamp,
+      toolCall,
     });
   }
 
@@ -306,7 +321,7 @@ export class AgentRuntimeRun {
     const evidence = hasVerificationEvidence(text) || hasSources(text) || this.toolCalls.length > 0 ? 0.85 : 0.45;
     const overall = average([goalCompletion, safety, format, evidence]);
 
-    return {
+    const evaluation: RuntimeEvaluation = {
       verdict: issues.length === 0
         ? 'PASS'
         : issues.includes('reported_blocker') && !hasBlockingContractIssue(issues)
@@ -325,6 +340,13 @@ export class AgentRuntimeRun {
       },
       issues,
     };
+    this.emitTrace('onEvaluation', {
+      runId: this.runId,
+      timestamp: Date.now(),
+      evaluation,
+      capability: this.getCapabilityScore(evaluation),
+    });
+    return evaluation;
   }
 
   createEvolutionFeedback(evaluation: RuntimeEvaluation): EvolutionFeedback {
@@ -335,7 +357,7 @@ export class AgentRuntimeRun {
 
     const signalList = [...signals];
     const proposals = this.createProposals(signalList);
-    return {
+    const feedback: EvolutionFeedback = {
       proposalType: proposals.length > 0 ? 'IMPROVE_RUNTIME' : 'NONE',
       allowedToModifySystem: false,
       signals: signalList,
@@ -344,6 +366,14 @@ export class AgentRuntimeRun {
         ? `Runtime created ${proposals.length} data-only evolution proposal(s).`
         : 'Runtime did not collect improvement signals.',
     };
+    for (const proposal of proposals) {
+      this.emitTrace('onEvolutionProposal', {
+        runId: this.runId,
+        timestamp: proposal.createdAt,
+        proposal,
+      });
+    }
+    return feedback;
   }
 
   getCapabilityScore(evaluation?: RuntimeEvaluation): AgentCapabilityScore {
@@ -398,6 +428,46 @@ export class AgentRuntimeRun {
     if (status === 'in_progress' && !step.startedAt) step.startedAt = Date.now();
     if (status === 'completed' || status === 'failed' || status === 'skipped') {
       step.completedAt = Date.now();
+    }
+    this.emitTrace('onPlanStep', {
+      runId: this.runId,
+      timestamp: Date.now(),
+      step: { ...step },
+    });
+  }
+
+  private emitTrace(
+    method: 'onRunStarted',
+    event: Parameters<NonNullable<RuntimeTraceSink['onRunStarted']>>[0],
+  ): void;
+  private emitTrace(
+    method: 'onPlanStep',
+    event: Parameters<NonNullable<RuntimeTraceSink['onPlanStep']>>[0],
+  ): void;
+  private emitTrace(
+    method: 'onToolCall',
+    event: Parameters<NonNullable<RuntimeTraceSink['onToolCall']>>[0],
+  ): void;
+  private emitTrace(
+    method: 'onEvaluation',
+    event: Parameters<NonNullable<RuntimeTraceSink['onEvaluation']>>[0],
+  ): void;
+  private emitTrace(
+    method: 'onEvolutionProposal',
+    event: Parameters<NonNullable<RuntimeTraceSink['onEvolutionProposal']>>[0],
+  ): void;
+  private emitTrace(
+    method: keyof Pick<RuntimeTraceSink, 'onRunStarted' | 'onPlanStep' | 'onToolCall' | 'onEvaluation' | 'onEvolutionProposal'>,
+    event: unknown,
+  ): void {
+    try {
+      const handler = this.traceSink?.[method] as ((value: unknown) => void | Promise<void>) | undefined;
+      const result = handler?.call(this.traceSink, event);
+      if (result && typeof (result as Promise<void>).catch === 'function') {
+        void (result as Promise<void>).catch(() => undefined);
+      }
+    } catch {
+      // Trace sinks are observational and must never interrupt runtime execution.
     }
   }
 
@@ -460,7 +530,7 @@ export function createAgentRuntimeRun(userIntent: string, options: AgentRuntimeO
   const skillReliability = summarizeSkillReliability(options.skillSummaries ?? []);
   const contract = createGoalContract(userIntent, options, toolAuthority);
   const contextQuality = estimateContextQuality(userIntent, toolAuthority, skillReliability);
-  return new AgentRuntimeRun(options.runId, contract, toolAuthority, skillReliability, contextQuality);
+  return new AgentRuntimeRun(options.runId, contract, toolAuthority, skillReliability, contextQuality, options.traceSink);
 }
 
 /** Converts a user intent into a deterministic, inspectable goal contract. */

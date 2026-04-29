@@ -119,6 +119,8 @@ mercury status       # 查看运行状态
 | `/permissions` | 修改权限模式 |
 | `/tasks` | 列出定时任务 |
 | `/memory` | 查看和管理 Second Brain 记忆 |
+
+Runtime trace 事件会本地写入 `~/.mercury/runtime-traces.jsonl`。如需导出为 OpenTelemetry 兼容的 OTLP/HTTP spans，可设置 `SUPERAGENT_TRACE_OTLP_ENDPOINT` 或 `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT`。
 | `/unpair` | Telegram：重置所有访问 |
 
 ## 内置工具
